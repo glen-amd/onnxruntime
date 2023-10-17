@@ -41,7 +41,7 @@ AMDUnifiedExecutionProvider::AMDUnifiedExecutionProvider(
     const AMDUnifiedExecutionProviderInfo& ep_info)
   : IExecutionProvider{onnxruntime::kAMDUnifiedExecutionProvider},
   ep_info_(ep_info) {
-    //custom_op_domains_ = ;
+    //custom_op_domains_ = initialize_amd_unified_ep();
     kernel_registry_ = std::make_shared<KernelRegistry>();
     CreateKernelRegistry();
 }
