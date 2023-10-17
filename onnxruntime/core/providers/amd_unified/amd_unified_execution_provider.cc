@@ -94,7 +94,7 @@ void AMDUnifiedExecutionProvider::CreateDownstreamEP_VitisAI(
     auto ep_info = VitisAIExecutionProviderInfo{provider_options};
     std::shared_ptr<VitisAIProviderFactory> ep_factory =
       VitisAIProviderFactoryCreator::Create(ep_info);
-    vitisai_ep_ = ep_factory->CreateProvider();
+    AMDUnifiedExecutionProvider::vitisai_ep_ = ep_factory->CreateProvider();
   }
 }
 

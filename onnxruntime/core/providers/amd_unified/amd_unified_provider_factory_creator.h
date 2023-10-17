@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "./amd_unified_execution_provider_info.h"
+
 // Standard libs/headers.
 #include <memory>
 

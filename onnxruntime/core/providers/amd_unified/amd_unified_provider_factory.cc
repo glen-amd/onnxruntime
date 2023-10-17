@@ -55,8 +55,8 @@ CreateExecutionProviderFactory_AMDUnified(
 std::shared_ptr<IExecutionProviderFactory>
 AMDUnifiedProviderFactoryCreator::Create(
     const ProviderOptions& provider_options) {
-  auto ep_info = AMDUnifiedExecutionProviderInfo{provider_options};
-  return std::shared_ptr<AMDUnifiedProviderFactory>(ep_info);
+  return std::make_shared<AMDUnifiedExecutionProvider>(
+      AMDUnifiedExecutionProviderInfo{provider_options});
 }
 
 #if 0

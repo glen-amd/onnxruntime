@@ -10,6 +10,7 @@
 #include "core/framework/ortdevice.h"
 #include "core/framework/provider_options.h"
 #include "core/session/onnxruntime_c_api.h"
+#include "./amd_unified_execution_provider_utils.h"
 
 
 namespace onnxruntime {
