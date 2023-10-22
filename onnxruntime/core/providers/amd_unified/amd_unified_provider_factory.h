@@ -14,4 +14,15 @@ namespace onnxruntime {
 struct IExecutionProviderFactory;
 struct AMDUnifiedExecutionProviderInfo;
 
+struct AMDUnifiedProviderFactory : IExecutionProviderFactory {
+  AMDUnifiedProviderFactory(const AMDUnifiedExecutionProviderInfo& ep_info)
+    : ep_info_(ep_info) {}
+  ~AMDUnifiedProviderFactory() = default;
+
+  std::unique_ptr<IExecutionProvider> CreateProvider() override;
+
+ private:
+  AMDUnifiedExecutionProviderInfo ep_info_;
+};
+
 }  // namespace onnxruntime

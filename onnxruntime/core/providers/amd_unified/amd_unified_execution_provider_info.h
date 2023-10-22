@@ -5,11 +5,13 @@
 
 // Standard libs/headers.
 #include <limits>
+#include <unordered_map>
 
 // 1st-party libs/headers.
 #include "core/framework/ortdevice.h"
 #include "core/framework/provider_options.h"
 #include "core/session/onnxruntime_c_api.h"
+#include "core/graph/constants.h"
 #include "./amd_unified_execution_provider_utils.h"
 
 
@@ -17,6 +19,7 @@ namespace onnxruntime {
 
 // User-defined information needed to construct an EP.
 struct AMDUnifiedExecutionProviderInfo {
+  std::unordered_map<std::string, ProviderOptions> downstream_ep_infos;
   std::vector<std::string> device_types;
 
   explicit AMDUnifiedExecutionProviderInfo(const ProviderOptions&);

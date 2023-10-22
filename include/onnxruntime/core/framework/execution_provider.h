@@ -19,6 +19,7 @@ struct ComputeCapability;
 class KernelRegistry;
 struct KernelCreateInfo;
 class Node;
+class InferenceSession;
 }  // namespace onnxruntime
 #else
 #include <memory>
@@ -326,6 +327,17 @@ class IExecutionProvider {
    */
   virtual std::vector<AllocatorPtr> CreatePreferredAllocators() { return std::vector<AllocatorPtr>(); };
 
+  /**
+   * Setter for the `InferenceSession` curr_sess_ member variable.
+  */
+  virtual void SetCurrentSession(InferenceSession* sess_ptr) {
+    curr_sess_ =
+
+  /**
+   * Getter for the `InferenceSession` curr_sess_ memeber variable.
+  */
+  virtual std::shared_ptr<InferenceSession> GetCurrentSession() const;
+
  private:
   const std::string type_;
 
@@ -344,5 +356,9 @@ class IExecutionProvider {
   };
 
   std::unique_ptr<ModelMetadefIdGenerator> metadef_id_generator_;
+
+  // The current `InferenceSession` instance with
+  // which an execution provider registers with.
+  std::shared_ptr<InferenceSession> curr_sess;
 };
 }  // namespace onnxruntime

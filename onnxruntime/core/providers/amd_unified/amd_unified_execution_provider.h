@@ -40,10 +40,10 @@ class AMDUnifiedExecutionProvider : public IExecutionProvider {
   // XXX: We only have a limited set of downstream EPs, such as
   // Vitis AI EP, MIGraphX EP, ZenDNN EP, and ROCm EP, so it's fine
   // that we simply enumerate all of the related methods here.
-  static void CreateDownstreamEP_VitisAI(const ProviderOptions&);
+  static void CreateDownstreamEP_VitisAI(const VitisAIExecutionProviderInfo&);
   // TODO: More EPs like MIGraphX EP, ZenDNN EP, etc.
-  //static void CreateDownstreamEP_MIGraphX(const ProviderOptions&);
-  //static void CreateDownstreamEP_ZenDNN(const ProviderOptions&);
+  //static void CreateDownstreamEP_MIGraphX();
+  //static void CreateDownstreamEP_ZenDNN();
 
  private:
   void CreateKernelRegistry();

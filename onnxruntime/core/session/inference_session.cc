@@ -640,6 +640,7 @@ common::Status InferenceSession::RegisterExecutionProvider(const std::shared_ptr
 
   p_exec_provider->SetLogger(session_logger_);
   session_profiler_.AddEpProfilers(p_exec_provider->GetProfiler());
+  p_exec_provider_->SetCurrentSession(this);
   return execution_providers_.Add(provider_type, p_exec_provider);
 }
 

@@ -10,6 +10,8 @@
 #include "core/session/inference_session.h"
 
 
+using namespace ONNX_NAMESPACE;
+
 namespace onnxruntime {
 
 constexpr const char* AMD_UNIFIED = "AMD_UNIFIED";
@@ -41,9 +43,29 @@ AMDUnifiedExecutionProvider::AMDUnifiedExecutionProvider(
     const AMDUnifiedExecutionProviderInfo& ep_info)
   : IExecutionProvider{onnxruntime::kAMDUnifiedExecutionProvider},
   ep_info_(ep_info) {
+    // FIXME (20231017):
+    // Before we decommission the covered downstream EPs,
+    // I'm not sure whether we need to explicitly do something
+    // like `initialize_amd_unified_ep()` where EP-custom op domains
+    // and EP-custom ops/kernels are created and registered.
+    // Seems like it's necessary because this unified EP very likely
+    // needs to implement all or part of the functions defined in
+    // `struct OrtApi`.
+    // In summary, `initialize_amd_unified_ep()` basically does two things:
+    // 1) Specifiy the implementation of function pointers in `struct OrtApi`;
+    // 2) EP-custom op domains and EP-cutom ops/kernels.
+    // FIXME (20231019):
+    // The implementation here will be quite different
+    // between before covered downstream EPs are decommissoned
+    // and after they are decommissioned.
+    // Before we decommission the covered downstream EPs,
+    // we don't need to do much about creation and registration of
+    // custom op domains and custom ops/kernels because these will
+    // be taken care of by covered downstream EPs still on duty.
+    // However, seems like `struct OrtApi`-related things need to be done.
     //custom_op_domains_ = initialize_amd_unified_ep();
     kernel_registry_ = std::make_shared<KernelRegistry>();
-    CreateKernelRegistry();
+    //CreateKernelRegistry();
 }
 
 void AMDUnifiedExecutionProvider::CreateKernelRegistry() {
@@ -89,9 +111,8 @@ std::unique_ptr<IExecutionProvider> vitisai_ep_;  // nullptr
 // - If we don't go with the aforementioned way, wee need to figure out
 // how to specify the necessary `VitisAIExecutionProviderInfo`.
 void AMDUnifiedExecutionProvider::CreateDownstreamEP_VitisAI(
-    const ProviderOptions& provider_options) {
+    const VitisAIExecutionProviderInfo& ep_info) {
   if (AMDUnifiedExecutionProvider::vitisai_ep_ == nullptr) {
-    auto ep_info = VitisAIExecutionProviderInfo{provider_options};
     std::shared_ptr<VitisAIProviderFactory> ep_factory =
       VitisAIProviderFactoryCreator::Create(ep_info);
     AMDUnifiedExecutionProvider::vitisai_ep_ = ep_factory->CreateProvider();

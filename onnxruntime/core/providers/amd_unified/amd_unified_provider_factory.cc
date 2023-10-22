@@ -12,9 +12,6 @@
 #include "core/framework/provider_options.h"
 #include "core/session/onnxruntime_c_api.h"
 
-// 3rd-party libs/headers.
-#include "nlohmann/json.hpp"
-
 // Standard libs/headers.
 #include <fstream>
 #include <unordered_map>
@@ -22,7 +19,6 @@
 
 
 using namespace onnxruntime;
-using json = nlohmann::json;
 
 namespace onnxruntime {
 
@@ -30,17 +26,6 @@ namespace onnxruntime {
 void InitializeRegistry();
 void DeleteRegistry();
 #endif
-
-struct AMDUnifiedProviderFactory : IExecutionProviderFactory {
-  AMDUnifiedProviderFactory(const AMDUnifiedExecutionProviderInfo& ep_info)
-    : ep_info_(ep_info) {}
-  ~AMDUnifiedProviderFactory() = default;
-
-  std::unique_ptr<IExecutionProvider> CreateProvider() override;
-
- private:
-  AMDUnifiedExecutionProviderInfo ep_info_;
-};
 
 std::unique_ptr<IExecutionProvider> AMDUnifiedProviderFactory::CreateProvider() {
   return std::make_unique<AMDUnifiedExecutionProvider>(ep_info_);
@@ -50,14 +35,14 @@ std::shared_ptr<IExecutionProviderFactory>
 CreateExecutionProviderFactory_AMDUnified(
     const AMDUnifiedExecutionProviderInfo& ep_info) {
   //initialize_amd_unified_ep();
-  return std::make_shared<AMDUnifiedExecutionProvider>(ep_info);
+  return std::make_shared<AMDUnifiedProviderFactory>(ep_info);
 }
 
 std::shared_ptr<IExecutionProviderFactory>
 AMDUnifiedProviderFactoryCreator::Create(
     const ProviderOptions& provider_options) {
   //initialize_amd_unified_ep();
-  return std::make_shared<AMDUnifiedExecutionProvider>(
+  return std::make_shared<AMDUnifiedProviderFactory>(
       AMDUnifiedExecutionProviderInfo{provider_options});
 }
 

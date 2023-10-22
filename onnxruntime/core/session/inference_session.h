@@ -103,7 +103,7 @@ struct ModelMetadata {
  *  process the output here...
  */
 
-class InferenceSession {
+class InferenceSession : std::enable_shared_from_this<InferenceSession> {
   struct InputOutputDefMetaData {
     InputOutputDefMetaData(const NodeArg* node_arg0, MLDataType ml_data_type0, TensorShape&& tensor_shape0)
         : node_arg(node_arg0), ml_data_type(ml_data_type0), tensor_shape(std::move(tensor_shape0)) {
