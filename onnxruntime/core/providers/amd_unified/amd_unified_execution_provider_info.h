@@ -19,7 +19,8 @@ namespace onnxruntime {
 
 // User-defined information needed to construct an EP.
 struct AMDUnifiedExecutionProviderInfo {
-  std::unordered_map<std::string, ProviderOptions> downstream_ep_infos;
+  // XXX: This is very probably not necessary.
+  //std::unordered_map<std::string, ProviderOptions> downstream_ep_infos;
   std::vector<std::string> device_types;
 
   explicit AMDUnifiedExecutionProviderInfo(const ProviderOptions&);
@@ -27,7 +28,7 @@ struct AMDUnifiedExecutionProviderInfo {
   explicit AMDUnifiedExecutionProviderInfo(const std::string&);
 
   AMDUnifiedExecutionProviderInfo() {
-    AMDUnifiedExecutionProviderInfo("CPU")
+    AMDUnifiedExecutionProviderInfo("CPU");
   }
 
   const char* get_json_config_str() const {

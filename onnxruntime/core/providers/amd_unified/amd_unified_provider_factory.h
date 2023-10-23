@@ -1,28 +1,24 @@
-// Copyright (c) 2023 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#pragma once
-
-#include "./amd_unified_execution_provider_info.h"
-
-// 1st-party libs/headers.
-#include "core/framework/provider_options.h"
 #include "onnxruntime_c_api.h"
 
-namespace onnxruntime {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-struct IExecutionProviderFactory;
-struct AMDUnifiedExecutionProviderInfo;
+/**
+ * \param use_arena zero: false. non-zero: true.
+ *
+ * A dedicated SessionOptionsAppendExecutionProvider_<provider name> function
+ * for `AMDUnifiedExecutionProvider`.
+ * Ref.: `SessionOptionsAppendExecutionProvider` in
+ * "include/onnxruntime/core/session/onnxruntime_c_api.h".
+ */
+ORT_EXPORT
+ORT_API_STATUS(OrtSessionOptionsAppendExecutionProvider_AMD_Unified, _In_ OrtSessionOptions* options, int use_arena)
+ORT_ALL_ARGS_NONNULL;
 
-struct AMDUnifiedProviderFactory : IExecutionProviderFactory {
-  AMDUnifiedProviderFactory(const AMDUnifiedExecutionProviderInfo& ep_info)
-    : ep_info_(ep_info) {}
-  ~AMDUnifiedProviderFactory() = default;
-
-  std::unique_ptr<IExecutionProvider> CreateProvider() override;
-
- private:
-  AMDUnifiedExecutionProviderInfo ep_info_;
-};
-
-}  // namespace onnxruntime
+#ifdef __cplusplus
+}
+#endif

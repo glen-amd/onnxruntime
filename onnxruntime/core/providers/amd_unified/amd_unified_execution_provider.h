@@ -7,6 +7,7 @@
 #include "core/framework/execution_provider.h"
 #include "core/framework/customregistry.h"
 #include "core/session/onnxruntime_c_api.h"
+#include "core/graph/constants.h"
 // XXX: Once the unified EP is ready, we probably need to
 // decommission current separate EPs such as Vitis AI EP,
 // MIGraphX EP, and ZenDNN EP from ONNXRuntime, but they
@@ -23,6 +24,8 @@
 
 namespace onnxruntime {
 
+class InferenceSession;
+
 // Logical representation of AMD devices CPU/GPU/IPU/FPGA etc.
 class AMDUnifiedExecutionProvider : public IExecutionProvider {
  public:
@@ -35,18 +38,15 @@ class AMDUnifiedExecutionProvider : public IExecutionProvider {
   common::Status Compile(const std::vector<FusedNodeAndGraph>&,
       std::vector<NodeComputeInfo>&) override;
 
-  std::shared_ptr<KernelRegistry> GetKernelRegistry() const override;
+  // TODO: More methods (overriding the methods in `IExecutionProvider`)
+  // need to be added on demand.
+  //std::shared_ptr<KernelRegistry> GetKernelRegistry() const override;
 
-  // XXX: We only have a limited set of downstream EPs, such as
-  // Vitis AI EP, MIGraphX EP, ZenDNN EP, and ROCm EP, so it's fine
-  // that we simply enumerate all of the related methods here.
-  static void CreateDownstreamEP_VitisAI(const VitisAIExecutionProviderInfo&);
-  // TODO: More EPs like MIGraphX EP, ZenDNN EP, etc.
-  //static void CreateDownstreamEP_MIGraphX();
-  //static void CreateDownstreamEP_ZenDNN();
+  std::shared_ptr<InferenceSession> GetCurrentSession() const;
+  void SetCurrentSession(std::shared_ptr<InferenceSession> sess);
 
  private:
-  void CreateKernelRegistry();
+  //void CreateKernelRegistry();
 
   std::vector<std::unique_ptr<ComputeCapability>> CombineDownstreamCapabilites(
       const onnxruntime::GraphViewer&, const IKernelLookup&) const;
@@ -55,17 +55,10 @@ class AMDUnifiedExecutionProvider : public IExecutionProvider {
       const std::vector<FusedNodeAndGraph>&, std::vector<NodeComputeInfo>&);
 
   AMDUnifiedExecutionProviderInfo ep_info_;
-  std::vector<OrtCustomOpDomain*> custom_op_domains_;
-  std::shared_ptr<KernelRegistry> kernel_registry_;
-  std::vector<std::string> amd_unified_optypes_;
+  //std::vector<OrtCustomOpDomain*> custom_op_domains_;
+  //std::shared_ptr<KernelRegistry> kernel_registry_;
 
-  // XXX: We only have a limited set of downstream EPs, such as
-  // Vitis AI EP, MIGraphX EP, ZenDNN EP, and ROCm EP, so it's fine
-  // that we simply enumerate the downstream EPs here.
-  static std::unique_ptr<IExecutionProvider> vitisai_ep_;
-  // TODO: More EPs like MIGraphX EP, ZenDNN EP, etc.
-  //static std::unique_ptr<IExecutionProvider> migraphx_ep_;
-  //static std::unique_ptr<IExecutionProvider> zendnn_ep_;
+  std::shared_ptr<InferenceSession> curr_sess_;
 };
 
 }  // namespace onnxruntime

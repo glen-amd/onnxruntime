@@ -608,8 +608,9 @@ typedef struct OrtMIGraphXProviderOptions {
  *
  * \see OrtApi::SessionOptionsAppendExecutionProvider_AMD_Unified
  */
-typedef struct OrtAMDUnifiedProviderOptions {
-} OrtAMDUnifiedProviderOptions;
+// TODO
+//typedef struct OrtAMDUnifiedProviderOptions {
+//} OrtAMDUnifiedProviderOptions;
 
 /** \brief OpenVINO Provider Options
  *

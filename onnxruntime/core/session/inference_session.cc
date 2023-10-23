@@ -610,6 +610,8 @@ common::Status InferenceSession::RegisterExecutionProvider(const std::shared_ptr
 
       session_options_.execution_mode = ExecutionMode::ORT_SEQUENTIAL;
     }
+  } else if (provider_type == onnxruntime::kAMDUnifiedExecutionProvider) {
+    p_exec_provider->SetCurrentSession(std::shared_ptr<InferenceSession>(this));
   }
 
 #if !defined(ORT_MINIMAL_BUILD) || defined(ORT_MINIMAL_BUILD_CUSTOM_OPS)
@@ -640,7 +642,6 @@ common::Status InferenceSession::RegisterExecutionProvider(const std::shared_ptr
 
   p_exec_provider->SetLogger(session_logger_);
   session_profiler_.AddEpProfilers(p_exec_provider->GetProfiler());
-  p_exec_provider_->SetCurrentSession(this);
   return execution_providers_.Add(provider_type, p_exec_provider);
 }
 

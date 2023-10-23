@@ -6,7 +6,7 @@
 using namespace onnxruntime;
 
 #if 0
-std::vector<OrtCustomOpDomain*> initialize_vitisai_ep() {
+std::vector<OrtCustomOpDomain*> initialize_amd_unified_ep() {
   // FIXME: common::Status or Ort::Status?
   Status status = Status::OK();
   try {
@@ -18,7 +18,8 @@ std::vector<OrtCustomOpDomain*> initialize_vitisai_ep() {
   auto domains = std::vector<OrtCustomOpDomain*>();
   // XXX
   domains.reserve(100);
-  onnxruntime_vitisai_ep::initialize_onnxruntime_vitisai_ep(create_org_api_hook(), domains);
+  onnxruntime_amd_unified_ep::initialize_onnxruntime_amd_unified_ep(
+    create_org_api_hook(), domains);
   auto& domainToVersionRangeInstance =
       ONNX_NAMESPACE::OpSchemaRegistry::DomainToVersionRange::Instance();
   if (domainToVersionRangeInstance.Map().find("com.xilinx") ==

@@ -3,11 +3,13 @@
 
 #include "amd_unified_execution_provider.h"
 
+// FIXME: Potential cyclic dependencies.
 // 1st-party libs/headers.
 #include "core/graph/graph_utils.h"
 #include "core/common/common.h"
 #include "core/session/custom_ops.h"
 #include "core/session/inference_session.h"
+#include "core/framework/execution_providers.h"
 
 
 using namespace ONNX_NAMESPACE;
@@ -43,31 +45,17 @@ AMDUnifiedExecutionProvider::AMDUnifiedExecutionProvider(
     const AMDUnifiedExecutionProviderInfo& ep_info)
   : IExecutionProvider{onnxruntime::kAMDUnifiedExecutionProvider},
   ep_info_(ep_info) {
-    // FIXME (20231017):
-    // Before we decommission the covered downstream EPs,
-    // I'm not sure whether we need to explicitly do something
-    // like `initialize_amd_unified_ep()` where EP-custom op domains
-    // and EP-custom ops/kernels are created and registered.
-    // Seems like it's necessary because this unified EP very likely
-    // needs to implement all or part of the functions defined in
-    // `struct OrtApi`.
+    // FIXME:
     // In summary, `initialize_amd_unified_ep()` basically does two things:
     // 1) Specifiy the implementation of function pointers in `struct OrtApi`;
-    // 2) EP-custom op domains and EP-cutom ops/kernels.
-    // FIXME (20231019):
-    // The implementation here will be quite different
-    // between before covered downstream EPs are decommissoned
-    // and after they are decommissioned.
-    // Before we decommission the covered downstream EPs,
-    // we don't need to do much about creation and registration of
-    // custom op domains and custom ops/kernels because these will
-    // be taken care of by covered downstream EPs still on duty.
-    // However, seems like `struct OrtApi`-related things need to be done.
+    // 2) Creation and registration of EP-custom op domains and ops/kernels.
     //custom_op_domains_ = initialize_amd_unified_ep();
-    kernel_registry_ = std::make_shared<KernelRegistry>();
+    //kernel_registry_ = std::make_shared<KernelRegistry>();
     //CreateKernelRegistry();
 }
 
+// TODO
+#if 0
 void AMDUnifiedExecutionProvider::CreateKernelRegistry() {
   for (const auto& domain : custom_op_domains_) {
     for (const auto* op : domain->custom_ops_) {
@@ -98,24 +86,23 @@ std::shared_ptr<KernelRegistry>
 AMDUnifiedExecutionProvider::GetKernelRegistry() const {
   return kernel_registry_;
 }
+#endif
 
-std::unique_ptr<IExecutionProvider> vitisai_ep_;  // nullptr
+std::shared_ptr<InferenceSession>
+AMDUnifiedExecutionProvider::GetCurrentSession() const {
+  // FIXME: We should log this.
+  if (curr_sess_.unique()) {
+    curr_sess_.reset();
+    curr_sess_ = nullptr;
+  }
+  return curr_sess_;
+}
 
-// XXX: After we decommission `VitisAIExecutionProvider` from
-// ONNXRuntime, i.e., `VitisAIExecutionProvider` is never registered
-// with ONNXRuntime:
-// - Do we still need to use `VitisAIProviderFactoryCreator` and
-// `VitisAIProviderFactory` to create a `VitisAIExecutionProvider`?
-// - If we still go with the aforementioned way, we need to figure out
-// how to specify the necessary `ProviderOptions`.
-// - If we don't go with the aforementioned way, wee need to figure out
-// how to specify the necessary `VitisAIExecutionProviderInfo`.
-void AMDUnifiedExecutionProvider::CreateDownstreamEP_VitisAI(
-    const VitisAIExecutionProviderInfo& ep_info) {
-  if (AMDUnifiedExecutionProvider::vitisai_ep_ == nullptr) {
-    std::shared_ptr<VitisAIProviderFactory> ep_factory =
-      VitisAIProviderFactoryCreator::Create(ep_info);
-    AMDUnifiedExecutionProvider::vitisai_ep_ = ep_factory->CreateProvider();
+void AMDUnifiedExecutionProvider::SetCurrentSession(
+    std::shared_ptr<InferenceSession>& sess) {
+  // FIXME: We should log this.
+  if (!curr_sess_) {
+    curr_sess_ = sess;
   }
 }
 
@@ -127,8 +114,10 @@ std::vector<std::unique_ptr<ComputeCapability>>
 AMDUnifiedExecutionProvider::CombineDownstreamCapabilites(
     const onnxruntime::GraphViewer& graph,
     const IKernelLookup& kernel_lookup) const {
-  return AMDUnifiedExecutionProvider::vitisai_ep_->GetCapability(graph,
-      kernel_lookup);
+  const ExecutionProviders& eps =
+    curr_sess_.GetSessionState().GetExecutionProviders();
+  VitisAIExecutionProvider* vitisai_ep = eps.Get(kVitisAIExecutionProvider);
+  return vitisai_ep->GetCapability(graph, kernel_lookup);
 }
 
 // TODO: When the unified EP is fully ready, we need to combine
@@ -138,9 +127,10 @@ AMDUnifiedExecutionProvider::CombineDownstreamCapabilites(
 common::Status AMDUnifiedExecutionProvider::CombineDownstreamCompilation(
     const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
     std::vector<NodeComputeInfo>& node_compute_funcs) {
-  AMDUnifiedExecutionProvider::vitisai_ep_->Compile(fused_nodes_and_graphs,
-      node_compute_funcs);
-  return Status::OK();
+  const ExecutionProviders& eps =
+    curr_sess_.GetSessionState().GetExecutionProviders();
+  VitisAIExecutionProvider* vitisai_ep = eps.Get(kVitisAIExecutionProvider);
+  return vitisai_ep->Compile(fused_nodes_and_graphs, node_compute_funcs);
 }
 
 std::vector<std::unique_ptr<ComputeCapability>>
