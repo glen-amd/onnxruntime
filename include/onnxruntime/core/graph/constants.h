@@ -22,6 +22,7 @@ constexpr const char* kMSNchwcDomain = "com.microsoft.nchwc";
 constexpr const char* kMSInternalNHWCDomain = "com.ms.internal.nhwc";
 constexpr const char* kMSDmlDomain = "com.microsoft.dml";
 constexpr const char* kNGraphDomain = "com.intel.ai";
+constexpr const char* kAMDUnifiedDomain = "com.amd";
 constexpr const char* kMIGraphXDomain = "";
 constexpr const char* kVitisAIDomain = "com.xilinx";
 

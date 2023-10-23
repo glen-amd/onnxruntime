@@ -46,6 +46,9 @@ void addGlobalSchemaFunctions(pybind11::module& m) {
 #ifdef USE_TENSORRT
             onnxruntime::TensorrtProviderFactoryCreator::Create(0),
 #endif
+#ifdef USE_AMD_UNIFIED
+            onnxruntime::AMDUnifiedProviderFactoryCreator::Create(ProviderOptions{}),
+#endif
 #ifdef USE_MIGRAPHX
             onnxruntime::MIGraphXProviderFactoryCreator::Create(0),
 #endif

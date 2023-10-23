@@ -69,6 +69,7 @@ with open(args.output_source, "w") as file:
         # https://github.com/microsoft/onnxruntime/pull/11798
         if c not in (
             "vitisai",
+            "amd_unified",
             "winml",
             "cuda",
             "rocm",

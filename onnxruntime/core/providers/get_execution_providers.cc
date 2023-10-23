@@ -77,6 +77,14 @@ constexpr ProviderInfo kProvidersInPriorityOrder[] =
 #endif
         },
         {
+            kAMDUnifiedExecutionProvider,
+#ifdef USE_AMD_UNIFIED
+            true,
+#else
+            false,
+#endif
+        },
+        {
             kVitisAIExecutionProvider,
 #ifdef USE_VITISAI
             true,

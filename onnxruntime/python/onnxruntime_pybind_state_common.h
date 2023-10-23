@@ -85,6 +85,13 @@ struct OrtStatus {
 #define BACKEND_TVM ""
 #endif
 
+#if USE_AMD_UNIFIED
+#define BACKEND_AMD_UNIFIED "-AMD-UNIFIED"
+#include "core/providers/vitisai/amd_unified_execution_provider.h"
+#else
+#define BACKEND_AMD_UNIFIED ""
+#endif
+
 #if USE_VITISAI
 #define BACKEND_VITISAI "-VITISAI"
 #include "core/providers/vitisai/vitisai_execution_provider.h"
@@ -451,6 +458,8 @@ std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Dnnl(c
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tvm(const tvm::TvmEPOptions& info);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tvm(const char* params);
 #endif
+//std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_AMD_Unified(const OrtAMDUnifiedProviderOptions* params);
+//std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_AMD_Unified(int device_id);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_VITISAI(const char* backend_type, int device_id,
                                                                                   const char* export_runtime_module,
                                                                                   const char* load_runtime_module);

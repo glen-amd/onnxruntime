@@ -59,6 +59,9 @@ function(add_op_reduction_include_dirs target)
 endfunction()
 
 
+if(onnxruntime_USE_AMD_UNIFIED)
+  set(PROVIDERS_AMD_UNIFIED onnxruntime_providers_amd_unified)
+endif()
 if(onnxruntime_USE_VITISAI)
   set(PROVIDERS_VITISAI onnxruntime_providers_vitisai)
 endif()
@@ -134,6 +137,10 @@ endif()
 
 if (onnxruntime_USE_TENSORRT)
   include(onnxruntime_providers_tensorrt.cmake)
+endif()
+
+if (onnxruntime_USE_AMD_UNIFIED)
+  include(onnxruntime_providers_amd_unified.cmake)
 endif()
 
 if (onnxruntime_USE_VITISAI)

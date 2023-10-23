@@ -32,7 +32,7 @@ std::unique_ptr<IExecutionProvider> AMDUnifiedProviderFactory::CreateProvider() 
 }
 
 std::shared_ptr<IExecutionProviderFactory>
-CreateExecutionProviderFactory_AMDUnified(
+CreateExecutionProviderFactory_AMD_Unified(
     const AMDUnifiedExecutionProviderInfo& ep_info) {
   //initialize_amd_unified_ep();
   return std::make_shared<AMDUnifiedProviderFactory>(ep_info);

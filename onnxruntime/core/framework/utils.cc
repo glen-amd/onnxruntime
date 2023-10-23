@@ -59,6 +59,7 @@ bool ProviderIsCpuBased(const std::string& provider_type) {
          provider_type == onnxruntime::kDnnlExecutionProvider ||
          provider_type == onnxruntime::kTvmExecutionProvider ||
          provider_type == onnxruntime::kVitisAIExecutionProvider ||
+         provider_type == onnxruntime::kAMDUnifiedExecutionProvider ||
          provider_type == onnxruntime::kOpenVINOExecutionProvider ||
          provider_type == onnxruntime::kNnapiExecutionProvider ||
          provider_type == onnxruntime::kAclExecutionProvider ||

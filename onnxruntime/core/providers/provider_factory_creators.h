@@ -78,6 +78,10 @@
 #include "core/providers/tvm/tvm_provider_factory_creator.h"
 #endif
 
+#if defined(USE_AMD_UNIFIED)
+#include "core/providers/amd_unified/amd_unified_provider_factory_creator.h"
+#endif
+
 #if defined(USE_VITISAI)
 #include "core/providers/vitisai/vitisai_provider_factory_creator.h"
 #endif

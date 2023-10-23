@@ -507,6 +507,7 @@ def parse_arguments():
     parser.add_argument("--eigen_path", help="Path to pre-installed Eigen.")
     parser.add_argument("--enable_msinternal", action="store_true", help="Enable for Microsoft internal builds only.")
     parser.add_argument("--llvm_path", help="Path to llvm dir")
+    parser.add_argument("--use_amd_unified", action="store_true", help="Build with AMD Unified EP")
     parser.add_argument("--use_vitisai", action="store_true", help="Build with Vitis-AI")
     parser.add_argument("--use_tvm", action="store_true", help="Build with TVM")
     parser.add_argument("--tvm_cuda_runtime", action="store_true", default=False, help="Build TVM with CUDA support")
@@ -970,6 +971,7 @@ def generate_build_tree(
         "-Donnxruntime_USE_RKNPU=" + ("ON" if args.use_rknpu else "OFF"),
         "-Donnxruntime_USE_LLVM=" + ("ON" if args.use_tvm else "OFF"),
         "-Donnxruntime_ENABLE_MICROSOFT_INTERNAL=" + ("ON" if args.enable_msinternal else "OFF"),
+        "-Donnxruntime_USE_AMD_UNIFIED=" + ("ON" if args.use_amd_unified else "OFF"),
         "-Donnxruntime_USE_VITISAI=" + ("ON" if args.use_vitisai else "OFF"),
         "-Donnxruntime_USE_TENSORRT=" + ("ON" if args.use_tensorrt else "OFF"),
         "-Donnxruntime_USE_TENSORRT_BUILTIN_PARSER="
@@ -1177,6 +1179,16 @@ def generate_build_tree(
 
     # TensorRT and OpenVINO providers currently only support
     # full_protobuf option.
+    if (
+        args.use_full_protobuf
+        or args.use_tensorrt
+        or args.use_openvino
+        or args.use_vitisai
+        or args.use_amd_unified
+        or args.gen_doc
+    ):
+        cmake_args += ["-Donnxruntime_USE_FULL_PROTOBUF=ON", "-DProtobuf_USE_STATIC_LIBS=ON"]
+
     if args.use_full_protobuf or args.use_tensorrt or args.use_openvino or args.use_vitisai or args.gen_doc:
         cmake_args += ["-Donnxruntime_USE_FULL_PROTOBUF=ON", "-DProtobuf_USE_STATIC_LIBS=ON"]
 
@@ -1959,6 +1971,7 @@ def build_python_wheel(
     use_tensorrt,
     use_openvino,
     use_tvm,
+    use_amd_unified,
     use_vitisai,
     use_acl,
     use_armnn,
@@ -2011,6 +2024,8 @@ def build_python_wheel(
             args.append("--use_dnnl")
         elif use_tvm:
             args.append("--use_tvm")
+        elif use_amd_unified:
+            args.append("--use_amd_unified")
         elif use_vitisai:
             args.append("--use_vitisai")
         elif use_acl:
@@ -2627,6 +2642,7 @@ def main():
                 args.use_tensorrt,
                 args.use_openvino,
                 args.use_tvm,
+                args.use_amd_unified,
                 args.use_vitisai,
                 args.use_acl,
                 args.use_armnn,

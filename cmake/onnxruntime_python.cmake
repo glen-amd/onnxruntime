@@ -170,6 +170,7 @@ target_link_libraries(onnxruntime_pybind11_state PRIVATE
     onnxruntime_session
     ${onnxruntime_libs}
     ${PROVIDERS_TVM}
+    ${PROVIDERS_AMD_UNIFIED}
     ${PROVIDERS_VITISAI}
     ${PROVIDERS_NNAPI}
     ${PROVIDERS_XNNPACK}
