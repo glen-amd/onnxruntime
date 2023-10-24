@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+// 1st-party libs/headers.
 #include "onnxruntime_c_api.h"
+#include "core/providers/providers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,3 +24,14 @@ ORT_ALL_ARGS_NONNULL;
 #ifdef __cplusplus
 }
 #endif
+
+struct AMDUnifiedProviderFactory : IExecutionProviderFactory {
+  AMDUnifiedProviderFactory(const AMDUnifiedExecutionProviderInfo& ep_info)
+    : ep_info_(ep_info) {}
+  ~VitisAIProviderFactory() = default;
+
+  std::unique_ptr<IExecutionProvider> CreateProvider() override;
+
+ private:
+  VitisAIExecutionProviderInfo ep_info_;
+};

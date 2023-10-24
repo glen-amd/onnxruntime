@@ -54,6 +54,13 @@ AMDUnifiedExecutionProvider::AMDUnifiedExecutionProvider(
     //CreateKernelRegistry();
 }
 
+AMDUnifiedExecutionProvider::~AMDUnifiedExecutionProvider() {
+  if (vitisai_ep_ptr_) {
+    vitisai_ep_ptr_.reset();
+    vitisai_ep_ptr_ = nullptr;
+  }
+}
+
 // TODO
 #if 0
 void AMDUnifiedExecutionProvider::CreateKernelRegistry() {
@@ -88,6 +95,7 @@ AMDUnifiedExecutionProvider::GetKernelRegistry() const {
 }
 #endif
 
+#if 0
 std::shared_ptr<InferenceSession>
 AMDUnifiedExecutionProvider::GetCurrentSession() const {
   // FIXME: We should log this.
@@ -105,6 +113,20 @@ void AMDUnifiedExecutionProvider::SetCurrentSession(
     curr_sess_ = sess;
   }
 }
+#endif
+
+void AMDUnifiedExecutionProvider::SetVitisAIEPPtr(
+  std::unique_ptr<IExecutionProvider> vitisai_ep_ptr) {
+    if (!vitisai_ep_ptr_) {
+      vitisai_ep_ptr_ = std::move(vitisai_ep_ptr);
+    }
+}
+
+// XXX: This getter method is not needed.
+const VitisAIExecutionProvider&
+AMDUnifiedExecutionProvider::GetVitisAIEP() const {
+  return *vitisai_ep_ptr_;
+}
 
 // TODO: When the unified EP is fully ready, we need to combine
 // the `ComputeCapability`s from all covered downstream decommissioned EPs.
@@ -114,10 +136,9 @@ std::vector<std::unique_ptr<ComputeCapability>>
 AMDUnifiedExecutionProvider::CombineDownstreamCapabilites(
     const onnxruntime::GraphViewer& graph,
     const IKernelLookup& kernel_lookup) const {
-  const ExecutionProviders& eps =
-    curr_sess_.GetSessionState().GetExecutionProviders();
-  VitisAIExecutionProvider* vitisai_ep = eps.Get(kVitisAIExecutionProvider);
-  return vitisai_ep->GetCapability(graph, kernel_lookup);
+  //const ExecutionProviders& eps =
+  //  curr_sess_.GetSessionState().GetExecutionProviders();
+  return vitisai_ep_ptr_->GetCapability(graph, kernel_lookup);
 }
 
 // TODO: When the unified EP is fully ready, we need to combine
@@ -127,10 +148,9 @@ AMDUnifiedExecutionProvider::CombineDownstreamCapabilites(
 common::Status AMDUnifiedExecutionProvider::CombineDownstreamCompilation(
     const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
     std::vector<NodeComputeInfo>& node_compute_funcs) {
-  const ExecutionProviders& eps =
-    curr_sess_.GetSessionState().GetExecutionProviders();
-  VitisAIExecutionProvider* vitisai_ep = eps.Get(kVitisAIExecutionProvider);
-  return vitisai_ep->Compile(fused_nodes_and_graphs, node_compute_funcs);
+  //const ExecutionProviders& eps =
+  //  curr_sess_.GetSessionState().GetExecutionProviders();
+  return vitisai_ep_ptr_->Compile(fused_nodes_and_graphs, node_compute_funcs);
 }
 
 std::vector<std::unique_ptr<ComputeCapability>>

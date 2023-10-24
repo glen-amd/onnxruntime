@@ -28,20 +28,21 @@ void DeleteRegistry();
 #endif
 
 std::unique_ptr<IExecutionProvider> AMDUnifiedProviderFactory::CreateProvider() {
-  return std::make_unique<AMDUnifiedExecutionProvider>(ep_info_);
+  auto amd_unified_ep_ptr = std::make_unique<AMDUnifiedExecutionProvider>(ep_info_);
+  auto vitisai_ep_ptr = std::make_unique<VitisAIExecutionProvider>(ep_info_);
+  amd_unified_ep_ptr->SetVitisAIEPPtr(std::move(vitisai_ep_ptr));
+  return amd_unified_ep_ptr;
 }
 
 std::shared_ptr<IExecutionProviderFactory>
 CreateExecutionProviderFactory_AMD_Unified(
     const AMDUnifiedExecutionProviderInfo& ep_info) {
-  //initialize_amd_unified_ep();
   return std::make_shared<AMDUnifiedProviderFactory>(ep_info);
 }
 
 std::shared_ptr<IExecutionProviderFactory>
 AMDUnifiedProviderFactoryCreator::Create(
     const ProviderOptions& provider_options) {
-  //initialize_amd_unified_ep();
   return std::make_shared<AMDUnifiedProviderFactory>(
       AMDUnifiedExecutionProviderInfo{provider_options});
 }

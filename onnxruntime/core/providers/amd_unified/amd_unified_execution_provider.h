@@ -24,13 +24,13 @@
 
 namespace onnxruntime {
 
-class InferenceSession;
+//class InferenceSession;
 
 // Logical representation of AMD devices CPU/GPU/IPU/FPGA etc.
 class AMDUnifiedExecutionProvider : public IExecutionProvider {
  public:
   explicit AMDUnifiedExecutionProvider(const AMDUnifiedExecutionProviderInfo&);
-  ~AMDUnifiedExecutionProvider() = default;
+  virtual ~AMDUnifiedExecutionProvider();
 
   std::vector<std::unique_ptr<ComputeCapability>> GetCapability(
       const onnxruntime::GraphViewer&, const IKernelLookup&) const override;
@@ -42,8 +42,12 @@ class AMDUnifiedExecutionProvider : public IExecutionProvider {
   // need to be added on demand.
   //std::shared_ptr<KernelRegistry> GetKernelRegistry() const override;
 
-  std::shared_ptr<InferenceSession> GetCurrentSession() const;
-  void SetCurrentSession(std::shared_ptr<InferenceSession> sess);
+  //std::shared_ptr<InferenceSession> GetCurrentSession() const;
+  //void SetCurrentSession(std::shared_ptr<InferenceSession> sess);
+
+  void SetVitisAIEPPtr(std::unique_ptr<IExecutionProvider> vitisai_ep_ptr);
+  // XXX: This getter method is not needed.
+  const VitisAIExecutionProvider& GetVitisAIEP() const;
 
  private:
   //void CreateKernelRegistry();
@@ -58,7 +62,11 @@ class AMDUnifiedExecutionProvider : public IExecutionProvider {
   //std::vector<OrtCustomOpDomain*> custom_op_domains_;
   //std::shared_ptr<KernelRegistry> kernel_registry_;
 
-  std::shared_ptr<InferenceSession> curr_sess_;
+  //std::shared_ptr<InferenceSession> curr_sess_;
+
+  std::unique_ptr<IExecutionProvider> vitisai_ep_ptr_
+  // TODO
+  //std::unique_ptr<IExecutionProvider> migraphx_ep_ptr_;
 };
 
 }  // namespace onnxruntime

@@ -610,8 +610,10 @@ common::Status InferenceSession::RegisterExecutionProvider(const std::shared_ptr
 
       session_options_.execution_mode = ExecutionMode::ORT_SEQUENTIAL;
     }
+#if 0
   } else if (provider_type == onnxruntime::kAMDUnifiedExecutionProvider) {
     p_exec_provider->SetCurrentSession(std::shared_ptr<InferenceSession>(this));
+#endif
   }
 
 #if !defined(ORT_MINIMAL_BUILD) || defined(ORT_MINIMAL_BUILD_CUSTOM_OPS)

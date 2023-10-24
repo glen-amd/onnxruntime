@@ -1,0 +1,34 @@
+# --------------------------------------------------------------
+# Copyright(C) Xilinx Inc.
+# Licensed under the MIT License.
+# --------------------------------------------------------------
+# Dockerfile to run ONNXRuntime with Vitis-AI integration
+
+#FROM ubuntu:20.04
+
+#ARG ONNXRUNTIME_REPO=https://github.com/Microsoft/onnxruntime
+#ARG ONNXRUNTIME_BRANCH=main
+
+#RUN apt-get clean && apt-get update && \
+#    apt-get install -y --no-install-recommends \
+#    sudo \
+#    git \
+#    bash \
+#    gcc-aarch64-linux-gnu && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
+
+#ENV PATH /code/cmake-3.27.3-linux-x86_64/bin:$PATH
+
+#WORKDIR /code
+#RUN . $VAI_ROOT/conda/etc/profile.d/conda.sh &&\
+#    git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
+#    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
+#    cp onnxruntime/docs/Privacy.md /code/Privacy.md &&\
+#    cp onnxruntime/dockerfiles/LICENSE-IMAGE.txt /code/LICENSE-IMAGE.txt &&\
+#    cp onnxruntime/ThirdPartyNotices.txt /code/ThirdPartyNotices.txt &&\
+#    cd onnxruntime &&\
+#    /bin/sh ./build.sh --allow_running_as_root --config RelWithDebInfo --enable_pybind --build_wheel --use_amd_unified --use_vitisai --parallel --update --build --build_shared_lib &&\
+#    pip install /code/onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl &&\
+#    cd .. &&\
+#    rm -rf onnxruntime cmake-3.27.3-linux-x86_64
