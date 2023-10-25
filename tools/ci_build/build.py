@@ -1184,7 +1184,7 @@ def generate_build_tree(
         or args.use_tensorrt
         or args.use_openvino
         or args.use_vitisai
-        or args.use_amd_unified
+        or args.use_amd_unified  # XXX: Not sure if we should put it here.
         or args.gen_doc
     ):
         cmake_args += ["-Donnxruntime_USE_FULL_PROTOBUF=ON", "-DProtobuf_USE_STATIC_LIBS=ON"]

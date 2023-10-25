@@ -49,7 +49,7 @@ class VitisAIExecutionProvider : public IExecutionProvider {
   // So, we can directly use `GetCapability()`.
   std::vector<std::unique_ptr<ComputeCapability>>
   GetCapability_Internal(const onnxruntime::GraphViewer& graph,
-                const IKernelLookup& /*kernel_lookup*/) const override;
+                const IKernelLookup& /*kernel_lookup*/) const;
 
   int GetDeviceId() const { return 0; }
 
@@ -65,7 +65,7 @@ class VitisAIExecutionProvider : public IExecutionProvider {
   // So, we can directly use `Compile()`.
   common::Status Compile_Internal(
       const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
-      std::vector<NodeComputeInfo>& node_compute_funcs) override;
+      std::vector<NodeComputeInfo>& node_compute_funcs);
 
   std::shared_ptr<KernelRegistry> GetKernelRegistry() const override;
 

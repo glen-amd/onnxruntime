@@ -610,6 +610,8 @@ typedef struct OrtMIGraphXProviderOptions {
  */
 // TODO.
 // For now, we only cover Vitis AI EP.
+// `ProviderOptions` of AMD unified EP should be a combination
+// of the `ProviderOptions`s of all covered downstream EPs.
 //typedef struct OrtAMDUnifiedProviderOptions {
 //} OrtAMDUnifiedProviderOptions;
 
@@ -3466,6 +3468,8 @@ struct OrtApi {
    *
    * \param[in] options
    * \param[in] amd_unified_options
+   *            `ProviderOptions` of AMD unified EP should be a combination
+   *            of the `ProviderOptions`s of all covered downstream EPs.
    *
    * \snippet{doc} snippets.dox OrtStatus Return Value
    *
