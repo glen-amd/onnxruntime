@@ -47,6 +47,8 @@ void addGlobalSchemaFunctions(pybind11::module& m) {
             onnxruntime::TensorrtProviderFactoryCreator::Create(0),
 #endif
 #ifdef USE_AMD_UNIFIED
+            // TODO: AMD unified EP's `ProviderOpitons` would be a combination
+            // of all covered downstream EPs' `ProviderOptions`.
             onnxruntime::AMDUnifiedProviderFactoryCreator::Create(ProviderOptions{}),
 #endif
 #ifdef USE_MIGRAPHX

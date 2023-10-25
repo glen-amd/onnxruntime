@@ -29,6 +29,7 @@ void DeleteRegistry();
 
 std::unique_ptr<IExecutionProvider> AMDUnifiedProviderFactory::CreateProvider() {
   auto amd_unified_ep_ptr = std::make_unique<AMDUnifiedExecutionProvider>(ep_info_);
+  // FIXME: The Vitis AI EP info will only be part of AMD Unified EP info.
   auto vitisai_ep_ptr = std::make_unique<VitisAIExecutionProvider>(ep_info_);
   amd_unified_ep_ptr->SetVitisAIEPPtr(std::move(vitisai_ep_ptr));
   return amd_unified_ep_ptr;

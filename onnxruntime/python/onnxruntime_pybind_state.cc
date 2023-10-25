@@ -862,7 +862,7 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
       LOGS_DEFAULT(FATAL) << "cannot find provider options for AMDUnifiedExecutionProvider";
     }
     const auto& amd_unified_option_map = it->second;
-    return onnxruntime::VitisAIProviderFactoryCreator::Create(amd_unified_option_map)
+    return onnxruntime::AMDUnifiedProviderFactoryCreator::Create(amd_unified_option_map)
         ->CreateProvider();
 #endif
   } else if (type == kVitisAIExecutionProvider) {

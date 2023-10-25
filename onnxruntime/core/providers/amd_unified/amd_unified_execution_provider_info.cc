@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #include "./amd_unified_execution_provider_info.h"
-#include "./amd_unified_execution_provider_utils.h"
 
 // 3rd-party libs/headers.
 #include "nlohmann/json.hpp"
@@ -30,12 +29,18 @@ static std::string ConfigToJsonStr(
 
 AMDUnifiedExecutionProviderInfo::AMDUnifiedExecutionProviderInfo(
     const ProviderOptions& provider_options)
-  : provider_options(provider_options),
-    json_config_{ConfigToJsonStr(provider_options)} {}
+  : provider_options_(provider_options),
+    json_config_{ConfigToJsonStr(provider_options)} {
+  // TODO
+  // downstream_ep_infos
+
+}
 
 AMDUnifiedExecutionProviderInfo::AMDUnifiedExecutionProviderInfo(
     const std::string& device_types_str) {
-    device_types = ParseDevicesStrRepr(device_types_str);
+  device_types = ParseDevicesStrRepr(device_types_str);
+  // TODO
+  // downstream_ep_infos
 }
 
 }  // namespace onnxruntime

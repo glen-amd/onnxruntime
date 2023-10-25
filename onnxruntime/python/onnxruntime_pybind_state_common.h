@@ -87,7 +87,7 @@ struct OrtStatus {
 
 #if USE_AMD_UNIFIED
 #define BACKEND_AMD_UNIFIED "-AMD-UNIFIED"
-#include "core/providers/vitisai/amd_unified_execution_provider.h"
+#include "core/providers/amd_unified/amd_unified_execution_provider.h"
 #else
 #define BACKEND_AMD_UNIFIED ""
 #endif

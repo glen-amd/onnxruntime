@@ -3,12 +3,10 @@
 
 #include "amd_unified_execution_provider.h"
 
-// FIXME: Potential cyclic dependencies.
 // 1st-party libs/headers.
 #include "core/graph/graph_utils.h"
 #include "core/common/common.h"
 #include "core/session/custom_ops.h"
-#include "core/session/inference_session.h"
 #include "core/framework/execution_providers.h"
 
 
@@ -116,7 +114,7 @@ void AMDUnifiedExecutionProvider::SetCurrentSession(
 #endif
 
 void AMDUnifiedExecutionProvider::SetVitisAIEPPtr(
-  std::unique_ptr<IExecutionProvider> vitisai_ep_ptr) {
+  std::unique_ptr<VitisAIExecutionProvider> vitisai_ep_ptr) {
     if (!vitisai_ep_ptr_) {
       vitisai_ep_ptr_ = std::move(vitisai_ep_ptr);
     }
@@ -163,8 +161,8 @@ AMDUnifiedExecutionProvider::GetCapability(
 common::Status VitisAIExecutionProvider::Compile(
     const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
     std::vector<NodeComputeInfo>& node_compute_funcs) {
-  CombineDownstreamCompilation(fused_nodes_and_graphs, node_compute_funcs);
-  return Status::OK();
+  return CombineDownstreamCompilation(fused_nodes_and_graphs,
+                                      node_compute_funcs);
 }
 
 }  // namespace onnxruntime

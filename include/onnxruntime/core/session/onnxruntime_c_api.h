@@ -608,7 +608,8 @@ typedef struct OrtMIGraphXProviderOptions {
  *
  * \see OrtApi::SessionOptionsAppendExecutionProvider_AMD_Unified
  */
-// TODO
+// TODO.
+// For now, we only cover Vitis AI EP.
 //typedef struct OrtAMDUnifiedProviderOptions {
 //} OrtAMDUnifiedProviderOptions;
 
@@ -3458,6 +3459,21 @@ struct OrtApi {
   void(ORT_API_CALL* ReleaseCUDAProviderOptions)(_Frees_ptr_opt_ OrtCUDAProviderOptionsV2* input);
 
   /// @}
+
+  /** \brief Append AMD Unified provider to session options
+   *
+   * If AMD Unified EP is not available (due to a non AMD Unified EP enabled build, or if AMD Unified EP is not installed on the system), this function will return failure.
+   *
+   * \param[in] options
+   * \param[in] amd_unified_options
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   *
+   * \since Version 1.11.
+   */
+  //ORT_API2_STATUS(SessionOptionsAppendExecutionProvider_AMD_Unified,
+  //                _In_ OrtSessionOptions* options, _In_ const OrtAMDUnifiedProviderOptions* amd_unified_options);
+
 
   /** \brief Append MIGraphX provider to session options
    *

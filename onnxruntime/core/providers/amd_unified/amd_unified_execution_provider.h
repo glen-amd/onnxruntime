@@ -64,7 +64,7 @@ class AMDUnifiedExecutionProvider : public IExecutionProvider {
 
   //std::shared_ptr<InferenceSession> curr_sess_;
 
-  std::unique_ptr<IExecutionProvider> vitisai_ep_ptr_
+  std::unique_ptr<VitisAIExecutionProvider> vitisai_ep_ptr_
   // TODO
   //std::unique_ptr<IExecutionProvider> migraphx_ep_ptr_;
 };
