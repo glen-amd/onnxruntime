@@ -56,6 +56,7 @@ VitisAIExecutionProviderInfo::VitisAIExecutionProviderInfo(
   // python_doc/source/session_option/encryption.rst
   // Note: we assume the key "config_file" always exists.
   const auto& filenames = SplitStr(provider_options.at("config_file"));
+  json_configs_.reserve(filenames.size());
   auto cache_dir_it = provider_options.find("cacheDir");
   const auto& cache_dirs = cache_dir_it != provider_options.end() ?
     SplitStr(cache_dir_it->second) : std::vector<std::string>();
@@ -80,7 +81,7 @@ VitisAIExecutionProviderInfo::VitisAIExecutionProviderInfo(
       }
       temp[entry.first] = entry.second;
     }
-    json_configs_.push_back(temp.dump());
+    json_configs_[i] = temp.dump();
     LOGS_DEFAULT(WARNING) << json_configs_[i] << '\n';
   }
 }

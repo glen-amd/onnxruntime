@@ -229,13 +229,13 @@ common::Status VitisAIExecutionProvider::CompileStandalone(size_t compiler_rank,
       continue;
     }
     size_t index = (size_t)attr->i();
-    compute_info.create_state_func = [this, index](ComputeContext* context,
-                                                   FunctionState* state) {
-      auto* p =
-        (**this->execution_providers_group_[compiler_rank])[index]->compile().release();
-      *state = p;
-      return 0;
-    };
+    compute_info.create_state_func =
+      [this, compiler_rank, index](ComputeContext* context, FunctionState* state) {
+        auto* p =
+          (**this->execution_providers_group_[compiler_rank])[index]->compile().release();
+        *state = p;
+        return 0;
+      };
     compute_info.release_state_func = [](FunctionState state) {
       if (state) {
         delete reinterpret_cast<vaip_core::CustomOp*>(state);
