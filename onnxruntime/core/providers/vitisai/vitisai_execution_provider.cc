@@ -212,12 +212,13 @@ void VitisAIExecutionProvider::CombineCapabilities(
     } else {
       LOGS_DEFAULT(WARNING) << "Combining a sub-graph consisting of "
         << p->sub_graph->nodes.size() << " nodes.";
-      capability_ptrs1.push_back(std::move(p));
+      //capability_ptrs1.push_back(std::move(p));
+      capability_ptrs1.emplace_back(p);
     }
   }
 }
 
-common::Status VitisAIExecutionProvider::CompileStandalone(size_t compiler_rank,
+void VitisAIExecutionProvider::CompileStandalone(size_t compiler_rank,
     const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
     std::vector<NodeComputeInfo>& node_compute_funcs) {
   // FIXME: Is it OK to iterate over the same `FusedNodeAndGraph`s twice?

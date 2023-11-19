@@ -33,6 +33,7 @@ static std::vector<std::string> SplitStr(const std::string& str,
   return res;
 }
 
+#if 0
 static std::string ConfigToJsonStr(const std::unordered_map<std::string, std::string>& config) {
   const auto& filename = config.at("config_file");
   std::ifstream f(filename);
@@ -42,6 +43,7 @@ static std::string ConfigToJsonStr(const std::unordered_map<std::string, std::st
   }
   return data.dump();
 }
+#endif
 
 // Provider options example:
 // {"config_file": "/etc/vaip_config.json","/etc/vaip_config_gemm_asr.json"}
@@ -56,7 +58,6 @@ VitisAIExecutionProviderInfo::VitisAIExecutionProviderInfo(
   // python_doc/source/session_option/encryption.rst
   // Note: we assume the key "config_file" always exists.
   const auto& filenames = SplitStr(provider_options.at("config_file"));
-  json_configs_.reserve(filenames.size());
   auto cache_dir_it = provider_options.find("cacheDir");
   const auto& cache_dirs = cache_dir_it != provider_options.end() ?
     SplitStr(cache_dir_it->second) : std::vector<std::string>();
@@ -81,7 +82,7 @@ VitisAIExecutionProviderInfo::VitisAIExecutionProviderInfo(
       }
       temp[entry.first] = entry.second;
     }
-    json_configs_[i] = temp.dump();
+    json_configs_.push_back(temp.dump());
     LOGS_DEFAULT(WARNING) << json_configs_[i] << '\n';
   }
 }

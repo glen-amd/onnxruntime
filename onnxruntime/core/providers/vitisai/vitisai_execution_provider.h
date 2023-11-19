@@ -28,7 +28,7 @@ struct VitisAIExecutionProviderInfo {
 
  private:
   ProviderOptions provider_options_;
-  const std::vector<std::string> json_configs_;
+  std::vector<std::string> json_configs_;
 };
 
 // Logical device representation.
@@ -62,8 +62,8 @@ class VitisAIExecutionProvider : public IExecutionProvider {
   //    const std::vector<std::unique_ptr<ComputeCapability>>&);
   void CombineCapabilities(std::vector<std::unique_ptr<ComputeCapability>>&,
       std::vector<std::unique_ptr<ComputeCapability>>&) const;
-  common::Status CompileStandalone(size_t,
-      const std::vector<FusedNodeAndGraph>&, std::vector<NodeComputeInfo>&);
+  void CompileStandalone(size_t, const std::vector<FusedNodeAndGraph>&,
+      std::vector<NodeComputeInfo>&);
   using my_ep_t = vaip_core::DllSafe<std::vector<std::unique_ptr<vaip_core::ExecutionProvider>>>;
   using my_ep_uptr_t = std::shared_ptr<my_ep_t>;
   // we have to hide the implementation by forward declaration.
