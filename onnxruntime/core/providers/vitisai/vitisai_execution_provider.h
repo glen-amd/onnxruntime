@@ -67,7 +67,7 @@ class VitisAIExecutionProvider : public IExecutionProvider {
   using my_ep_t = vaip_core::DllSafe<std::vector<std::unique_ptr<vaip_core::ExecutionProvider>>>;
   using my_ep_uptr_t = std::shared_ptr<my_ep_t>;
   // we have to hide the implementation by forward declaration.
-  mutable std::vector<mutable my_ep_uptr_t> execution_providers_group_;
+  mutable std::vector<my_ep_uptr_t> execution_providers_group_;
   VitisAIExecutionProviderInfo info_;
   std::vector<OrtCustomOpDomain*> custom_op_domains_;
   std::shared_ptr<KernelRegistry> registry_;
