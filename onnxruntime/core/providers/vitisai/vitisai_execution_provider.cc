@@ -127,8 +127,8 @@ VitisAIExecutionProvider::GetCapabilityStandalone(size_t compiler_rank,
     return {};
   }
   auto opt_str = info_.get_json_config_str(compiler_rank);
-  execution_providers_group_[compiler_rank] = compile_onnx_model(
-      graph, *GetLogger(), opt_str);
+  execution_providers_group_[compiler_rank] = std::make_unique<my_ep_t>(
+      compile_onnx_model(graph, *GetLogger(), opt_str));
   auto result = vaip::GetComputeCapabilityOps(
       graph, execution_providers_group_[compiler_rank].get(), vitisai_optypes_);
   size_t index = 0u;
@@ -189,7 +189,7 @@ struct SingleElemVectorHasher {
 
 void VitisAIExecutionProvider::CombineCapabilities(
     std::vector<std::unique_ptr<ComputeCapability>>& capability_ptrs1,
-    std::vector<std::unique_ptr<ComputeCapability>>& capability_ptrs2) {
+    std::vector<std::unique_ptr<ComputeCapability>>& capability_ptrs2) const {
   std::unordered_set<std::vector<size_t>, SingleElemVectorHasher> vec_set;
   for (const auto& p : capability_ptrs1) {
     // 1. Overlap is allowed. Ref.:

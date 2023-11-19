@@ -61,7 +61,7 @@ class VitisAIExecutionProvider : public IExecutionProvider {
   //Graph GenerateInterimGraph(const onnxruntime::GraphViewer&,
   //    const std::vector<std::unique_ptr<ComputeCapability>>&);
   void CombineCapabilities(std::vector<std::unique_ptr<ComputeCapability>>&,
-      std::vector<std::unique_ptr<ComputeCapability>>&);
+      std::vector<std::unique_ptr<ComputeCapability>>&) const;
   common::Status CompileStandalone(size_t,
       const std::vector<FusedNodeAndGraph>&, std::vector<NodeComputeInfo>&);
   using my_ep_t = vaip_core::DllSafe<std::vector<std::unique_ptr<vaip_core::ExecutionProvider>>>;
