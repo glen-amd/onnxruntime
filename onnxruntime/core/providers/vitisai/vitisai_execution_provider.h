@@ -22,13 +22,13 @@ namespace onnxruntime {
 struct VitisAIExecutionProviderInfo {
   VitisAIExecutionProviderInfo(const ProviderOptions& provider_options);
 
-  const char* get_json_config_str() const {
-    return json_config_.c_str();
+  const char* get_json_config_str(size_t i = 0) const {
+    return json_configs_[i].c_str();
   }
 
  private:
   ProviderOptions provider_options_;
-  const std::string json_config_;
+  const std::vector<std::string> json_configs_;
 };
 
 // Logical device representation.
@@ -36,6 +36,11 @@ class VitisAIExecutionProvider : public IExecutionProvider {
  public:
   explicit VitisAIExecutionProvider(const VitisAIExecutionProviderInfo& info);
   ~VitisAIExecutionProvider() = default;
+
+  enum class CompilerRank : size_t {
+    XCOMPILER = 0,
+    TVM = 1,
+  };
 
   std::vector<std::unique_ptr<ComputeCapability>>
   GetCapability(const onnxruntime::GraphViewer& graph,
@@ -50,10 +55,19 @@ class VitisAIExecutionProvider : public IExecutionProvider {
 
  private:
   void CreateKernelRegistry();
+  std::vector<std::unique_ptr<ComputeCapability>> GetCapabilityStandalone(
+      size_t, const onnxruntime::GraphViewer&) const;
+  //Model* CloneModel(const Model&);
+  //Graph GenerateInterimGraph(const onnxruntime::GraphViewer&,
+  //    const std::vector<std::unique_ptr<ComputeCapability>>&);
+  void CombineCapabilities(std::vector<std::unique_ptr<ComputeCapability>>&,
+      std::vector<std::unique_ptr<ComputeCapability>>&);
+  common::Status CompileStandalone(size_t,
+      const std::vector<FusedNodeAndGraph>&, std::vector<NodeComputeInfo>&);
   using my_ep_t = vaip_core::DllSafe<std::vector<std::unique_ptr<vaip_core::ExecutionProvider>>>;
   using my_ep_uptr_t = std::shared_ptr<my_ep_t>;
   // we have to hide the implementation by forward declaration.
-  mutable my_ep_uptr_t execution_providers_;
+  mutable std::vector<mutable my_ep_uptr_t> execution_providers_group_;
   VitisAIExecutionProviderInfo info_;
   std::vector<OrtCustomOpDomain*> custom_op_domains_;
   std::shared_ptr<KernelRegistry> registry_;
