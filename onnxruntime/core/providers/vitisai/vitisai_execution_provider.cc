@@ -213,7 +213,10 @@ void VitisAIExecutionProvider::CombineCapabilities(
       LOGS_DEFAULT(WARNING) << "Combining a sub-graph consisting of "
         << p->sub_graph->nodes.size() << " nodes.";
       //capability_ptrs1.push_back(std::move(p));
-      capability_ptrs1.emplace_back(p);
+      //capability_ptrs1.push_back(
+      //    std::forward<std::unique_ptr<ComputeCapability>>(std::move(p)));
+      capability_ptrs1.emplace_back(
+          const_cast<std::unique_ptr<ComputeCapability>>(p));
     }
   }
 }
@@ -249,7 +252,6 @@ void VitisAIExecutionProvider::CompileStandalone(size_t compiler_rank,
       };
     node_compute_funcs.push_back(compute_info);
   }
-  return Status::OK();
 }
 
 common::Status VitisAIExecutionProvider::Compile(
