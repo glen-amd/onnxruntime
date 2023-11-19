@@ -213,10 +213,9 @@ void VitisAIExecutionProvider::CombineCapabilities(
       LOGS_DEFAULT(WARNING) << "Combining a sub-graph consisting of "
         << p->sub_graph->nodes.size() << " nodes.";
       //capability_ptrs1.push_back(std::move(p));
-      //capability_ptrs1.push_back(
-      //    std::forward<std::unique_ptr<ComputeCapability>>(std::move(p)));
-      capability_ptrs1.emplace_back(
-          const_cast<std::unique_ptr<ComputeCapability>>(p));
+      capability_ptrs1.push_back(
+          std::forward<std::unique_ptr<ComputeCapability>>(std::move(p)));
+      //capability_ptrs1.emplace_back(p);
     }
   }
 }
