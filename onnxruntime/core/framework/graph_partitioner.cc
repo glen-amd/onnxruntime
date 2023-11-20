@@ -134,6 +134,7 @@ struct GetCapabilityForEPParams {
 static Status GetCapabilityForEP(const GetCapabilityForEPParams& params) {
   auto& current_ep = params.current_ep.get();
   const auto& ep_type = current_ep.Type();
+  LOGS_DEFAULT(WARNING) << "Calling GetCapabilityForEP for " << ep_type;
 
 #if !defined(ORT_MINIMAL_BUILD) || defined(ORT_EXTENDED_MINIMAL_BUILD)
   if (current_ep.GetPreferredLayout() == DataLayout::NHWC && !params.transform_layout.get()) {
@@ -377,6 +378,7 @@ static Status PartitionOnnxFormatModelImpl(Graph& graph, FuncManager& func_mgr,
 
   ORT_RETURN_IF_ERROR(GetCapabilityForEP(get_capability_params));
   if (capabilities.empty()) {
+    LOGS_DEFAULT(WARNING) << "Empty compute-capabilities from " << current_ep.Type();
     return Status::OK();
   }
 
@@ -436,6 +438,7 @@ static Status PartitionOnnxFormatModelImpl(Graph& graph, FuncManager& func_mgr,
         nodes_and_viewers.push_back(IExecutionProvider::FusedNodeAndGraph{*node, *viewers.back()});
       }
 
+      LOGS_DEFAULT(WARNING) << "Trying to call Compile on " << type;
       ORT_RETURN_IF_ERROR(current_ep.Compile(nodes_and_viewers, node_compute_funcs));
 
       if (node_compute_funcs.size() != nodes_to_compile.size()) {
@@ -547,6 +550,7 @@ static Status PartitionOnnxFormatModel(const PartitionParams& partition_params, 
   do {
     // process full graph with each EP
     for (const auto& ep : execution_providers) {
+      LOGS_DEFAULT(WARNING) << "Trying to partition an ONNX model using EP " << ep->Type();
       ORT_RETURN_IF_ERROR(PartitionOnnxFormatModelImpl(graph, func_mgr, kernel_registry_manager,
                                                        fused_kernel_registry, *ep, mode, fused_node_unique_id,
                                                        transform_layout_function,

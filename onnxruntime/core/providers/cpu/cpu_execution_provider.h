@@ -5,6 +5,7 @@
 
 #include "core/framework/execution_provider.h"
 #include "core/graph/constants.h"
+#include "core/common/logging/logging.h"
 
 namespace onnxruntime {
 

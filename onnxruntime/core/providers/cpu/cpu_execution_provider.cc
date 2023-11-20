@@ -26,6 +26,7 @@ struct KernelRegistryAndStatus {
 namespace onnxruntime {
 CPUExecutionProvider::CPUExecutionProvider(const CPUExecutionProviderInfo& info)
     : IExecutionProvider{onnxruntime::kCpuExecutionProvider}, info_{info} {
+  LOGS_DEFAULT(WARNING) << "Constructing a CPUExecutionProvider...";
 }
 
 std::vector<AllocatorPtr> CPUExecutionProvider::CreatePreferredAllocators() {
