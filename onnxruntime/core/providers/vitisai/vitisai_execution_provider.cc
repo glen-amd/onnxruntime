@@ -201,7 +201,7 @@ void VitisAIExecutionProvider::CombineCapabilities(
       vec_set.insert(p->sub_graph->nodes);
     }
   }
-  for (const auto& p : capability_ptrs2) {
+  for (auto& p : capability_ptrs2) {
     if (p->sub_graph->nodes.size() == 1) {
       if (vec_set.count(p->sub_graph->nodes) == 0) {
         LOGS_DEFAULT(WARNING) << "Combining the node " << p->sub_graph->nodes[0];
@@ -216,6 +216,8 @@ void VitisAIExecutionProvider::CombineCapabilities(
       capability_ptrs1.push_back(
           std::forward<std::unique_ptr<ComputeCapability>>(std::move(p)));
       //capability_ptrs1.emplace_back(p);
+      //capability_ptrs1.emplace_back(
+      //    const_cast<std::unique_ptr<ComputeCapability>&>(p));
     }
   }
 }
