@@ -224,12 +224,15 @@ void VitisAIExecutionProvider::CombineCapabilities(
 void VitisAIExecutionProvider::CompileStandalone(size_t compiler_rank,
     const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
     std::vector<NodeComputeInfo>& node_compute_funcs) {
+  LOGS_DEFAULT(WARNING) << "Compiling using the compiler " << compiler_rank;
   // FIXME: Is it OK to iterate over the same `FusedNodeAndGraph`s twice?
   for (const auto& fused_node_graph : fused_nodes_and_graphs) {
     NodeComputeInfo compute_info;
     const onnx::AttributeProto* attr = graph_utils::GetNodeAttribute(
         fused_node_graph.fused_node, "index");
     if (attr == nullptr) {
+      LOGS_DEFAULT(WARNING) << "Node " << fused_node_graph.Index() << ' '
+        << fused_node_graph.Name() << " doesn't have \"index\" attribute";
       continue;
     }
     size_t index = (size_t)attr->i();
