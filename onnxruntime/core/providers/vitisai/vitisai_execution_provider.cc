@@ -231,9 +231,7 @@ void VitisAIExecutionProvider::CompileStandalone(size_t compiler_rank,
     const onnx::AttributeProto* attr = graph_utils::GetNodeAttribute(
         fused_node_graph.fused_node, "index");
     if (attr == nullptr) {
-      LOGS_DEFAULT(WARNING) << "Node " << fused_node_graph.fused_node.Index()
-        << ' ' << fused_node_graph.fused_node.Name()
-        << " doesn't have \"index\" attribute";
+      LOGS_DEFAULT(WARNING) << "\"index\" attribute missing";
       continue;
     }
     size_t index = (size_t)attr->i();
