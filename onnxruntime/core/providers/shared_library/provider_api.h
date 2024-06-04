@@ -120,6 +120,7 @@ struct TypeProto_Sequence;
 struct TypeProto;
 struct ValueInfoProto;
 struct ValueInfoProtos;  // RepeatedPtrField
+struct FunctionProto;
 struct InferenceContext;
 class GraphInferencer;
 using InferenceFunction = std::function<void(InferenceContext&)>;
@@ -146,6 +147,7 @@ struct ConfigOptions;
 struct DataTransferManager;
 struct IndexedSubGraph;
 struct IndexedSubGraph_MetaDef;
+enum class IndexedSubGraph_SourceOfSchema : uint8_t;
 struct KernelCreateInfo;
 struct KernelDef;
 struct KernelDefBuilder;
