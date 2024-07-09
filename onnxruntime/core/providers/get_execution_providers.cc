@@ -21,6 +21,14 @@ struct ProviderInfo {
 constexpr ProviderInfo kProvidersInPriorityOrder[] =
     {
         {
+            kAMDUnifiedExecutionProvider,
+#ifdef USE_AMD_UNIFIED
+            true,
+#else
+            false,
+#endif
+        },
+        {
             kTensorrtExecutionProvider,
 #ifdef USE_TENSORRT
             true,
@@ -55,6 +63,14 @@ constexpr ProviderInfo kProvidersInPriorityOrder[] =
         {
             kOpenVINOExecutionProvider,
 #ifdef USE_OPENVINO
+            true,
+#else
+            false,
+#endif
+        },
+        {
+            kZendnnExecutionProvider,
+#ifdef USE_ZENDNN
             true,
 #else
             false,

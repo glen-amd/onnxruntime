@@ -851,6 +851,12 @@ inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_Dnn
 }
 
 template <typename T>
+inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_Zendnn(const OrtZendnnProviderOptions& provider_options) {
+  ThrowOnError(GetApi().SessionOptionsAppendExecutionProvider_Zendnn(this->p_, &provider_options));
+  return *this;
+}
+
+template <typename T>
 inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider(
     const std::string& provider_name,
     const std::unordered_map<std::string, std::string>& provider_options) {
@@ -866,6 +872,12 @@ inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider(
     }
   }
 
+#ifdef USE_AMD_UNIFIED
+  if (provider_name == "VitisAI" || provider_name == "MIGraphX" || provider_name == "Zendnn") {
+    ThrowOnError(GetApi().SessionOptionsAppendExecutionProvider(this->p_, "AMD_Unified",
+                                                                keys.data(), values.data(), num_entries));
+  }
+#else
   ThrowOnError(GetApi().SessionOptionsAppendExecutionProvider(this->p_, provider_name.c_str(),
                                                               keys.data(), values.data(), num_entries));
 
@@ -918,6 +930,9 @@ inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_Ope
 
 template <typename T>
 inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_VitisAI(const std::unordered_map<std::string, std::string>& provider_options) {
+#ifdef USE_AMD_UNIFIED
+  return AppendExecutionProvider_AMD_Unified_V2(provider_options);
+#endif
   auto num_entries = provider_options.size();
   std::vector<const char*> keys, values;
   if (num_entries > 0) {
@@ -931,6 +946,31 @@ inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_Vit
   }
 
   ThrowOnError(GetApi().SessionOptionsAppendExecutionProvider_VitisAI(this->p_, keys.data(), values.data(), num_entries));
+
+  return *this;
+}
+
+template <typename T>
+inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_AMD_Unified(const OrtAMDUnifiedProviderOptions& provider_options) {
+  ThrowOnError(GetApi().SessionOptionsAppendExecutionProvider_AMD_Unified(this->p_, &provider_options));
+  return *this;
+}
+
+template <typename T>
+inline SessionOptionsImpl<T>& SessionOptionsImpl<T>::AppendExecutionProvider_AMD_Unified_V2(const std::unordered_map<std::string, std::string>& provider_options) {
+  auto num_entries = provider_options.size();
+  std::vector<const char*> keys, values;
+  if (num_entries > 0) {
+    keys.reserve(num_entries);
+    values.reserve(num_entries);
+
+    for (const auto& entry : provider_options) {
+      keys.push_back(entry.first.c_str());
+      values.push_back(entry.second.c_str());
+    }
+  }
+
+  ThrowOnError(GetApi().SessionOptionsAppendExecutionProvider_AMD_Unified_V2(this->p_, keys.data(), values.data(), num_entries));
 
   return *this;
 }

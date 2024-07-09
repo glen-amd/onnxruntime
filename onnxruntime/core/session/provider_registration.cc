@@ -72,6 +72,13 @@ ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider,
     return status;
   }
 
+  const char* provider_name_used = provider_name;
+#ifdef USE_AMD_UNIFIED
+  if (strcmp(provider_name, "VitisAI") == 0 || strcmp(provider_name, "MIGraphX") == 0 || strcmp(provider_name, "Zendnn") == 0) {
+    provider_name_used = "AMD_Unified";
+  }
+#endif
+
 #ifdef _WIN32
   for (const auto& config_pair : provider_options) {
     TraceLoggingWrite(
@@ -79,52 +86,52 @@ ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider,
         "ProviderOptionsAppendExecutionProvider",
         TraceLoggingKeyword(static_cast<uint64_t>(onnxruntime::logging::ORTTraceLoggingKeyword::Session)),
         TraceLoggingLevel(WINEVENT_LEVEL_INFO),
-        TraceLoggingString(provider_name, "ProviderName"),
+        TraceLoggingString(provider_name_used, "ProviderName"),
         TraceLoggingString(config_pair.first.c_str(), "Key"),
         TraceLoggingString(config_pair.second.c_str(), "Value"));
   }
 #endif
 
-  auto create_not_supported_status = [&provider_name]() {
+  auto create_not_supported_status = [&provider_name_used]() {
     return OrtApis::CreateStatus(ORT_INVALID_ARGUMENT,
-                                 (std::string(provider_name) + " execution provider is not supported in this build. ").c_str());
+                                 (std::string(provider_name_used) + " execution provider is not supported in this build. ").c_str());
   };
 
   for (const auto& config_pair : provider_options) {
-    ORT_THROW_IF_ERROR(options->value.config_options.AddConfigEntry((std::string(provider_name) + ":" + config_pair.first).c_str(), config_pair.second.c_str()));
+    ORT_THROW_IF_ERROR(options->value.config_options.AddConfigEntry((std::string(provider_name_used) + ":" + config_pair.first).c_str(), config_pair.second.c_str()));
   }
 
-  if (strcmp(provider_name, "DML") == 0) {
+  if (strcmp(provider_name_used, "DML") == 0) {
 #if defined(USE_DML)
     options->provider_factories.push_back(DMLProviderFactoryCreator::CreateFromProviderOptions(options->value.config_options, provider_options));
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "QNN") == 0) {
+  } else if (strcmp(provider_name_used, "QNN") == 0) {
 #if defined(USE_QNN)
     options->provider_factories.push_back(QNNProviderFactoryCreator::Create(provider_options, &(options->value)));
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "OpenVINO") == 0) {
+  } else if (strcmp(provider_name_used, "OpenVINO") == 0) {
 #if defined(USE_OPENVINO)
     options->provider_factories.push_back(OpenVINOProviderFactoryCreator::Create(&provider_options, &(options->value)));
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "SNPE") == 0) {
+  } else if (strcmp(provider_name_used, "SNPE") == 0) {
 #if defined(USE_SNPE)
     options->provider_factories.push_back(SNPEProviderFactoryCreator::Create(provider_options));
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "XNNPACK") == 0) {
+  } else if (strcmp(provider_name_used, "XNNPACK") == 0) {
 #if defined(USE_XNNPACK)
     options->provider_factories.push_back(XnnpackProviderFactoryCreator::Create(provider_options, &(options->value)));
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "WEBNN") == 0) {
+  } else if (strcmp(provider_name_used, "WEBNN") == 0) {
 #if defined(USE_WEBNN)
     std::string deviceType = options->value.config_options.GetConfigOrDefault("deviceType", "cpu");
     provider_options["deviceType"] = deviceType;
@@ -132,13 +139,13 @@ ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider,
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "AZURE") == 0) {
+  } else if (strcmp(provider_name_used, "AZURE") == 0) {
 #if defined(USE_AZURE)
     options->provider_factories.push_back(AzureProviderFactoryCreator::Create(provider_options));
 #else
     status = create_not_supported_status();
 #endif
-  } else if (strcmp(provider_name, "JS") == 0) {
+  } else if (strcmp(provider_name_used, "JS") == 0) {
 #if defined(USE_JSEP)
     std::string preferred_layout;
     if (options->value.config_options.TryGetConfigEntry("preferredLayout", preferred_layout)) {
@@ -501,5 +508,59 @@ ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_VitisAI,
   ORT_UNUSED_PARAMETER(provider_options_values);
   ORT_UNUSED_PARAMETER(num_keys);
   return CreateNotEnabledStatus("VitisAI");
+}
+
+ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_Zendnn,
+                    _In_ OrtSessionOptions* options, _In_ const OrtZendnnProviderOptions* zendnn_options) {
+  ORT_UNUSED_PARAMETER(options);
+  ORT_UNUSED_PARAMETER(zendnn_options);
+  return CreateNotEnabledStatus("Zendnn");
+}
+
+ORT_API_STATUS_IMPL(OrtApis::CreateZendnnProviderOptions, _Outptr_ OrtZendnnProviderOptions** out) {
+  ORT_UNUSED_PARAMETER(out);
+  return CreateNotEnabledStatus("Zendnn");
+}
+
+ORT_API_STATUS_IMPL(OrtApis::UpdateZendnnProviderOptions,
+                    _Inout_ OrtZendnnProviderOptions* zendnn_options,
+                    _In_reads_(num_keys) const char* const* provider_options_keys,
+                    _In_reads_(num_keys) const char* const* provider_options_values,
+                    size_t num_keys) {
+  ORT_UNUSED_PARAMETER(zendnn_options);
+  ORT_UNUSED_PARAMETER(provider_options_keys);
+  ORT_UNUSED_PARAMETER(provider_options_values);
+  ORT_UNUSED_PARAMETER(num_keys);
+  return CreateNotEnabledStatus("Zendnn");
+}
+
+ORT_API_STATUS_IMPL(OrtApis::GetZendnnProviderOptionsAsString,
+                    _In_ const OrtZendnnProviderOptions* zendnn_options, _Inout_ OrtAllocator* allocator,
+                    _Outptr_ char** ptr) {
+  ORT_UNUSED_PARAMETER(zendnn_options);
+  ORT_UNUSED_PARAMETER(allocator);
+  ORT_UNUSED_PARAMETER(ptr);
+  return CreateStatus(ORT_FAIL, "Zendnn execution provider is not enabled in this build.");
+}
+
+ORT_API(void, OrtApis::ReleaseZendnnProviderOptions, _Frees_ptr_opt_ OrtZendnnProviderOptions* ptr) {
+  ORT_UNUSED_PARAMETER(ptr);
+}
+
+ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified,
+                    _In_ OrtSessionOptions* options, _In_ const OrtAMDUnifiedProviderOptions* amd_unified_options) {
+  ORT_UNUSED_PARAMETER(options);
+  ORT_UNUSED_PARAMETER(amd_unified_options);
+  return CreateNotEnabledStatus("AMD_Unified");
+}
+
+ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified_V2,
+                    _In_ OrtSessionOptions* options, _In_reads_(num_keys) const char* const* provider_options_keys,
+                    _In_reads_(num_keys) const char* const* provider_options_values, _In_ size_t num_keys) {
+  ORT_UNUSED_PARAMETER(options);
+  ORT_UNUSED_PARAMETER(provider_options_keys);
+  ORT_UNUSED_PARAMETER(provider_options_values);
+  ORT_UNUSED_PARAMETER(num_keys);
+  return CreateNotEnabledStatus("AMD_Unified");
 }
 #endif

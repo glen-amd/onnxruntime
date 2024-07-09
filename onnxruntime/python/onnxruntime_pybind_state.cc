@@ -1013,6 +1013,35 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
 
     return onnxruntime::DnnlProviderFactoryCreator::Create(&dnnl_options)->CreateProvider();
 #endif
+  } else if (type == kZendnnExecutionProvider) {
+#ifdef USE_ZENDNN
+    // Generate zendnn_options
+    OrtZendnnProviderOptions zendnn_options;
+// For Eigen and OpenMP
+#if defined(ZENDNN_OPENMP)
+    int num_threads = 0;
+    auto it = provider_options_map.find(type);
+    if (it != provider_options_map.end()) {
+      for (auto option : it->second) {
+        if (option.first == "num_of_threads") {
+          num_threads = std::stoi(option.second);
+          if (num_threads < 0) {
+            ORT_THROW(
+                "[ERROR] [ZenDNN] Invalid entry for the key 'num_of_threads',"
+                " set number of threads or use '0' for default\n");
+            // If the user doesnt define num_threads, auto detect threads later
+          }
+        } else {
+          ORT_THROW("Invalid ZenDNN EP option: ", option.first);
+        }
+      }
+    }
+    zendnn_options.threadpool_args = static_cast<void*>(&num_threads);
+#endif  // !defined(ZENDNN_ORT_THREAD)
+    zendnn_options.use_arena = session_options.enable_cpu_mem_arena;
+
+    return onnxruntime::ZendnnProviderFactoryCreator::Create(&zendnn_options)->CreateProvider();
+#endif
   } else if (type == kOpenVINOExecutionProvider) {
 #ifdef USE_OPENVINO
     ProviderOptions OV_provider_options_map;
@@ -1115,6 +1144,15 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
       info = it->second;
     }
     return onnxruntime::VitisAIProviderFactoryCreator::Create(info)->CreateProvider();
+#endif
+#if USE_AMD_UNIFIED
+    ProviderOptions amd_unified_option_map{};
+    const auto it = provider_options_map.find(type);
+    if (it != provider_options_map.end()) {
+      amd_unified_option_map = it->second;
+    }
+    return onnxruntime::AMDUnifiedProviderFactoryCreator::Create(
+        amd_unified_option_map)->CreateProvider();
 #endif
   } else if (type == kAclExecutionProvider) {
 #ifdef USE_ACL
@@ -1220,6 +1258,25 @@ static void RegisterExecutionProviders(InferenceSession* sess, const std::vector
     auto ep = CreateExecutionProviderInstance(sess->GetSessionOptions(), type, provider_options_map);
     if (ep)
       OrtPybindThrowIfError(sess->RegisterExecutionProvider(std::move(ep)));
+#if USE_AMD_UNIFIED
+    if (type == kMIGraphXExecutionProvider || type == kVitisAIExecutionProvider || type == kZendnnExecutionProvider) {
+      // XXX: Seems like we could simply use a local boolean value to indicate
+      // whether an `AMDUnifiedExecutionProvider` has been registered.
+      // This current way of checking the current session is safer for avoiding
+      // duplicate registration of `AMDUnifiedExecutionProvider`.
+      // There are only limited number of execution providers,
+      // so the time complexity is constant.
+      auto registered_types = sess->GetRegisteredProviderTypes();
+      if (std::find(registered_types.begin(), registered_types.end(),
+            kAMDUnifiedExecutionProvider) == registered_types.end()) {
+        auto ep = CreateExecutionProviderInstance(sess->GetSessionOptions(),
+            kAMDUnifiedExecutionProvider, provider_options_map);
+        if (ep) {
+          OrtPybindThrowIfError(sess->RegisterExecutionProvider(std::move(ep)));
+        }
+      }
+    }
+#endif
   }
 }
 

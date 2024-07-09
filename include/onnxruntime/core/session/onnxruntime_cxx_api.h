@@ -890,6 +890,8 @@ struct SessionOptionsImpl : ConstSessionOptionsImpl<T> {
   SessionOptionsImpl& AppendExecutionProvider_CANN(const OrtCANNProviderOptions& provider_options);
   ///< Wraps OrtApi::SessionOptionsAppendExecutionProvider_Dnnl
   SessionOptionsImpl& AppendExecutionProvider_Dnnl(const OrtDnnlProviderOptions& provider_options);
+  ///< Wraps OrtApi::SessionOptionsAppendExecutionProvider_Zendnn
+  SessionOptionsImpl& AppendExecutionProvider_Zendnn(const OrtZendnnProviderOptions& provider_options);
   /// Wraps OrtApi::SessionOptionsAppendExecutionProvider. Currently supports QNN, SNPE and XNNPACK.
   SessionOptionsImpl& AppendExecutionProvider(const std::string& provider_name,
                                               const std::unordered_map<std::string, std::string>& provider_options = {});
@@ -907,6 +909,11 @@ struct SessionOptionsImpl : ConstSessionOptionsImpl<T> {
 
   ///< Wraps OrtApi::SessionOptionsAppendExecutionProvider_VitisAI
   SessionOptionsImpl& AppendExecutionProvider_VitisAI(const std::unordered_map<std::string, std::string>& provider_options = {});
+
+  ///< Wraps OrtApi::SessionOptionsAppendExecutionProvider_AMD_Unified
+  SessionOptionsImpl& AppendExecutionProvider_AMD_Unified(const OrtAMDUnifiedProviderOptions& provider_options);
+  ///< Wraps OrtApi::SessionOptionsAppendExecutionProvider_AMD_Unified_V2
+  SessionOptionsImpl& AppendExecutionProvider_AMD_Unified_V2(const std::unordered_map<std::string, std::string>& provider_options = {});
 };
 }  // namespace detail
 

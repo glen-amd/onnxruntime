@@ -623,6 +623,63 @@ typedef struct OrtMIGraphXProviderOptions {
   const char* migraphx_load_model_path;              // migraphx model path name
 } OrtMIGraphXProviderOptions;
 
+typedef struct OrtZendnnProviderOptions {
+  int use_arena;          // If arena is used, use_arena 0 = not used, nonzero = used
+  void* threadpool_args;  // Used to enable configure the ZenDNN threadpool
+} OrtZendnnProviderOptions;
+
+/** \brief AMD Unified Provider Options
+ *
+ * \see OrtApi::SessionOptionsAppendExecutionProvider_AMD_Unified
+ */
+// `ProviderOptions` of AMD unified EP should be a combination
+// of the `ProviderOptions`s of all covered downstream EPs, and
+// meanwhile should be backward-compatible with existing apps using "old" EPs.
+//
+// `MIGraphXExecutionProvider` has fixed `ProviderOptions` as shown above and
+// in onnxruntime/core/providers/migraphx/migraphx_execution_provider_info.cc.
+//
+// `VitisAIExecutionProvider` has a fixed set of `ProviderOptions` where
+// some options are required and some are optional.
+//
+// `ZendnnExecutionProvider` has fixed `ProviderOptions` as shown above and
+// in onnxruntime/core/providers/zendnn/zendnn_execution_provider_info.cc.
+//
+// FIXME:
+// In cases where different downstream EPs covered by AMD Unified EP have
+// the same option names, conflicts arise.
+typedef struct OrtAMDUnifiedProviderOptions {
+  // Bit-mask.
+  // 1: Vitis AI.
+  // 2: MIGraphX.
+  // 4: ZenDNN.
+  // Bit-OR Combinations.
+  int backends;
+
+  // VitisAI EP:
+  const char* config_file;  // Option name "config_file"
+  const char* xclbin_location;  // Option name "xclbin"
+  const char* cache_dir;  // Option name "cacheDir"
+  const char* cache_key;  // Option name "cacheKey"
+  const char* encryption_key;  // Option name "encryptionKey"
+
+  // MIGraphX EP:
+  // HIP device Id.
+  int device_id;
+  // Enable MIGraphX FP16 precision. Default 0 = false, nonzero = true.
+  int migraphx_fp16_enable;
+  // Enable MIGraphX INT8 precision. Default 0 = false, nonzero = true.
+  int migraphx_int8_enable;
+  // MIGraphx INT8 cal table. Default 0 = false, noznero = true.
+  int migraphx_use_native_calibration_table;
+  // MIGraphx INT8 calibration table name.
+  const char* migraphx_int8_calibration_table_name;
+
+  // ZenDNN EP:
+  int use_arena;  // If arena is used, use_arena 0 = not used, nonzero = used
+  void* threadpool_args;  // Used to enable configure the ZenDNN threadpool
+} OrtAMDUnifiedProviderOptions;
+
 /** \brief OpenVINO Provider Options
  *
  * \see OrtApi::SessionOptionsAppendExecutionProvider_OpenVINO
@@ -4621,6 +4678,92 @@ struct OrtApi {
                   _In_reads_(num_keys) const char* const* provider_options_values,
                   _In_ size_t num_keys);
 
+  /** \brief Append zendnn provider to session options
+   *
+   * If ZenDNN is not available, this function will return failure.
+   *
+   * \param[in] options
+   * \param[in] zendnn_options
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   */
+  ORT_API2_STATUS(SessionOptionsAppendExecutionProvider_Zendnn,
+                  _In_ OrtSessionOptions* options, _In_ const OrtZendnnProviderOptions* zendnn_options);
+
+  /** \brief Create an OrtZendnnProviderOptions
+   *
+   * \param[out] out Newly created ::OrtZendnnProviderOptions. Must be released with OrtApi::ReleaseZendnnProviderOptions
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   */
+  ORT_API2_STATUS(CreateZendnnProviderOptions, _Outptr_ OrtZendnnProviderOptions** out);
+
+  /** \brief Set options in a ZenDNN Execution Provider.
+   *
+   * Key should be in null terminated string format of the member of ::OrtZendnnProviderOptions
+   * and value should be its related range.
+   *
+   * For example, key="use_arena" and value="1"
+   *
+   * \param[in] zendnn_options
+   * \param[in] provider_options_keys Array of UTF-8 null-terminated string for provider options keys
+   * \param[in] provider_options_values Array of UTF-8 null-terminated string for provider options values
+   * \param[in] num_keys Number of elements in the `provider_option_keys` and `provider_options_values` arrays
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   */
+  ORT_API2_STATUS(UpdateZendnnProviderOptions, _Inout_ OrtZendnnProviderOptions* zendnn_options,
+                  _In_reads_(num_keys) const char* const* provider_options_keys,
+                  _In_reads_(num_keys) const char* const* provider_options_values,
+                  _In_ size_t num_keys);
+
+  /**
+   * Get serialized ZenDNN provider options string.
+   *
+   * For example, "use_arena=1;......"
+   *
+   * \param zendnn_options - OrtZendnnProviderOptions instance
+   * \param allocator - a ptr to an instance of OrtAllocator obtained with CreateAllocator() or GetAllocatorWithDefaultOptions()
+   *                      the specified allocator will be used to allocate continuous buffers for output strings and lengths.
+   * \param ptr - is a UTF-8 null terminated string allocated using 'allocator'. The caller is responsible for using the same allocator to free it.
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   */
+  ORT_API2_STATUS(GetZendnnProviderOptionsAsString, _In_ const OrtZendnnProviderOptions* zendnn_options, _Inout_ OrtAllocator* allocator, _Outptr_ char** ptr);
+
+  /** \brief Release an ::OrtZendnnProviderOptions
+   */
+  void(ORT_API_CALL* ReleaseZendnnProviderOptions)(_Frees_ptr_opt_ OrtZendnnProviderOptions* input);
+
+  /** \brief Append AMD-Unified execution provider to the session options
+   *
+   * If AMD-Unified is not available (due to a non AMD-Unified enabled build, or if AMD-Unified is not installed on the system), this function will fail.
+   *
+   * \param[in] options
+   * \param[in] provider_options
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   */
+  ORT_API2_STATUS(SessionOptionsAppendExecutionProvider_AMD_Unified,
+                  _In_ OrtSessionOptions* options, _In_ const OrtAMDUnifiedProviderOptions* provider_options);
+
+  /** \brief Append AMD-Unified provider to session options
+   *
+   * If AMD-Unified is not available (due to a non AMD-Unified enabled build, or if AMD-Unified is not installed on the system), this function will return failure.
+   *
+   * \param[in] options
+   * \param[in] provider_options_keys
+   * \param[in] provider_options_values
+   * \param[in] num_keys
+   *
+   * \snippet{doc} snippets.dox OrtStatus Return Value
+   */
+  ORT_API2_STATUS(SessionOptionsAppendExecutionProvider_AMD_Unified_V2,
+                  _In_ OrtSessionOptions* options,
+                  _In_reads_(num_keys) const char* const* provider_options_keys,
+                  _In_reads_(num_keys) const char* const* provider_options_values,
+                  _In_ size_t num_keys);
+
   /** \brief Get scratch buffer from the corresponding allocator under the sepcific OrtMemoryInfo object.
    *         NOTE: callers are responsible to release this scratch buffer from the corresponding allocator
    *  \param[in] context OrtKernelContext instance
@@ -4816,6 +4959,8 @@ ORT_API_STATUS(OrtSessionOptionsAppendExecutionProvider_MIGraphX, _In_ OrtSessio
  * \param use_arena zero: false. non-zero: true.
  */
 ORT_API_STATUS(OrtSessionOptionsAppendExecutionProvider_Dnnl, _In_ OrtSessionOptions* options, int use_arena);
+
+ORT_API_STATUS(OrtSessionOptionsAppendExecutionProvider_Zendnn, _In_ OrtSessionOptions* options, int use_arena);
 
 /*
  * This is the old way to add the TensorRT provider to the session, please use SessionOptionsAppendExecutionProvider_TensorRT_V2 above to access the latest functionality

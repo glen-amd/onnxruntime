@@ -29,6 +29,7 @@ PROVIDERS = {
     "rocm": "ROCMExecutionProvider",
     "migraphx": "MIGraphXExecutionProvider",
     "tensorrt": "TensorrtExecutionProvider",
+    "amd_unified": "AMDUnifiedExecutionProvider",
 }
 
 

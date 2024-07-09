@@ -37,8 +37,8 @@ namespace perftest {
       "\t-A: Disable memory arena\n"
       "\t-I: Generate tensor input binding (Free dimensions are treated as 1.)\n"
       "\t-c [parallel runs]: Specifies the (max) number of runs to invoke simultaneously. Default:1.\n"
-      "\t-e [cpu|cuda|dnnl|tensorrt|openvino|dml|acl|nnapi|coreml|qnn|snpe|rocm|migraphx|xnnpack|vitisai]: Specifies the provider 'cpu','cuda','dnnl','tensorrt', "
-      "'openvino', 'dml', 'acl', 'nnapi', 'coreml', 'qnn', 'snpe', 'rocm', 'migraphx', 'xnnpack' or 'vitisai'. "
+      "\t-e [cpu|cuda|dnnl|zendnn|tensorrt|openvino|dml|acl|nnapi|coreml|qnn|snpe|amd_unified|rocm|migraphx|xnnpack|vitisai]: Specifies the provider 'cpu','cuda','dnnl','zendnn','tensorrt', "
+      "'openvino', 'dml', 'acl', 'nnapi', 'coreml', 'qnn', 'snpe', 'amd_unified', 'rocm', 'migraphx', 'xnnpack' or 'vitisai'. "
       "Default:'cpu'.\n"
       "\t-b [tf|ort]: backend to use. Default:ort\n"
       "\t-r [repeated_times]: Specifies the repeated times if running in 'times' test mode.Default:1000.\n"
@@ -246,10 +246,14 @@ static bool ParseSessionConfigs(const std::string& configs_string,
       case 'e':
         if (!CompareCString(optarg, ORT_TSTR("cpu"))) {
           test_config.machine_config.provider_type_name = onnxruntime::kCpuExecutionProvider;
+        } else if (!CompareCString(optarg, ORT_TSTR("amd_unified"))) {
+          test_config.machine_config.provider_type_name = onnxruntime::kAMDUnifiedExecutionProvider;
         } else if (!CompareCString(optarg, ORT_TSTR("cuda"))) {
           test_config.machine_config.provider_type_name = onnxruntime::kCudaExecutionProvider;
         } else if (!CompareCString(optarg, ORT_TSTR("dnnl"))) {
           test_config.machine_config.provider_type_name = onnxruntime::kDnnlExecutionProvider;
+        } else if (!CompareCString(optarg, ORT_TSTR("zendnn"))) {
+          test_config.machine_config.provider_type_name = onnxruntime::kZendnnExecutionProvider;
         } else if (!CompareCString(optarg, ORT_TSTR("openvino"))) {
           test_config.machine_config.provider_type_name = onnxruntime::kOpenVINOExecutionProvider;
           test_config.run_config.optimization_level = ORT_DISABLE_ALL;

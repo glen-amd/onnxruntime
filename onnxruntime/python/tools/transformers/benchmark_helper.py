@@ -119,6 +119,7 @@ def create_onnxruntime_session(
                 providers = [
                     "MIGraphXExecutionProvider",
                     "ROCMExecutionProvider",
+                    "AMDUnifiedExecutionProvider",
                     "CPUExecutionProvider",
                 ]
             elif provider == "cuda":
@@ -132,7 +133,10 @@ def create_onnxruntime_session(
             else:
                 providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
         else:
-            providers = ["CPUExecutionProvider"]
+            if provider == "zendnn":
+                providers = ["ZendnnExecutionProvider", "AMDUnifiedExecutionProvider", "CPUExecutionProvider"]
+            else:
+                providers = ["CPUExecutionProvider"]
 
         if provider_options:
             providers = [(name, provider_options[name]) if name in provider_options else name for name in providers]
@@ -173,7 +177,7 @@ def prepare_environment(cache_dir, output_dir, use_gpu, provider=None):
 
         else:
             assert not set(onnxruntime.get_available_providers()).isdisjoint(
-                ["CUDAExecutionProvider", "ROCMExecutionProvider", "MIGraphXExecutionProvider"]
+                ["CUDAExecutionProvider", "ROCMExecutionProvider", "MIGraphXExecutionProvider", "AMDUnifiedExecutionProvider"]
             ), "Please install onnxruntime-gpu package, or install ROCm support, to test GPU inference."
 
     logger.info(f"PyTorch Version:{torch.__version__}")

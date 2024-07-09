@@ -24,6 +24,7 @@ constexpr const char* kMSDmlDomain = "com.microsoft.dml";
 constexpr const char* kNGraphDomain = "com.intel.ai";
 constexpr const char* kMIGraphXDomain = "";
 constexpr const char* kVitisAIDomain = "com.xilinx";
+constexpr const char* kAMDUnifiedDomain = "com.amd";
 
 // This is moved from the OrtApis::GetAvailableProviders implementation
 // where it is enforced
@@ -33,6 +34,7 @@ constexpr const char* kCpuExecutionProvider = "CPUExecutionProvider";
 constexpr const char* kCudaExecutionProvider = "CUDAExecutionProvider";
 constexpr const char* kCudaNHWCExecutionProvider = "CUDANHWCExecutionProvider";
 constexpr const char* kDnnlExecutionProvider = "DnnlExecutionProvider";
+constexpr const char* kZendnnExecutionProvider = "ZendnnExecutionProvider";
 constexpr const char* kOpenVINOExecutionProvider = "OpenVINOExecutionProvider";
 constexpr const char* kVitisAIExecutionProvider = "VitisAIExecutionProvider";
 constexpr const char* kTensorrtExecutionProvider = "TensorrtExecutionProvider";
@@ -53,6 +55,7 @@ constexpr const char* kWebNNExecutionProvider = "WebNNExecutionProvider";
 constexpr const char* kCannExecutionProvider = "CANNExecutionProvider";
 constexpr const char* kAzureExecutionProvider = "AzureExecutionProvider";
 constexpr const char* kVSINPUExecutionProvider = "VSINPUExecutionProvider";
+constexpr const char* kAMDUnifiedExecutionProvider = "AMDUnifiedExecutionProvider";
 
 constexpr const char* kExecutionProviderSharedLibraryPath = "shared_lib_path";
 constexpr const char* kExecutionProviderSharedLibraryEntry = "provider_factory_entry_point";

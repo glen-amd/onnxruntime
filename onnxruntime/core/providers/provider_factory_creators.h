@@ -38,6 +38,10 @@
 #include "core/providers/dnnl/dnnl_provider_factory_creator.h"
 #endif
 
+#if defined(USE_ZENDNN)
+#include "core/providers/zendnn/zendnn_provider_factory_creator.h"
+#endif
+
 #if defined(USE_MIGRAPHX)
 #include "core/providers/migraphx/migraphx_provider_factory_creator.h"
 #endif
@@ -84,6 +88,10 @@
 
 #if defined(USE_VITISAI)
 #include "core/providers/vitisai/vitisai_provider_factory_creator.h"
+#endif
+
+#if defined(USE_AMD_UNIFIED)
+#include "core/providers/amd_unified/amd_unified_provider_factory_creator.h"
 #endif
 
 #if defined(USE_XNNPACK)

@@ -82,16 +82,20 @@ using IndexedSubGraph_MetaDef = IndexedSubGraph::MetaDef;
 #include "core/providers/cann/cann_provider_factory_creator.h"
 #include "core/providers/rocm/rocm_provider_factory_creator.h"
 #include "core/providers/dnnl/dnnl_provider_factory_creator.h"
+#include "core/providers/zendnn/zendnn_provider_factory_creator.h"
 #include "core/providers/migraphx/migraphx_provider_factory_creator.h"
 #include "core/providers/openvino/openvino_provider_factory_creator.h"
 #include "core/providers/tensorrt/tensorrt_provider_factory_creator.h"
 #include "core/providers/vitisai/vitisai_provider_factory_creator.h"
+#include "core/providers/amd_unified/amd_unified_provider_factory_creator.h"
 
 #include "core/providers/cuda/cuda_provider_factory.h"
 #include "core/providers/cann/cann_provider_factory.h"
 #include "core/providers/rocm/rocm_provider_factory.h"
 #include "core/providers/dnnl/dnnl_provider_factory.h"
+#include "core/providers/zendnn/zendnn_provider_factory.h"
 #include "core/providers/migraphx/migraphx_provider_factory.h"
+#include "core/providers/amd_unified/amd_unified_provider_factory.h"
 #include "core/providers/openvino/openvino_provider_factory.h"
 #include "core/providers/tensorrt/tensorrt_provider_factory.h"
 #include "core/providers/tensorrt/tensorrt_provider_options.h"
@@ -131,6 +135,8 @@ ProviderInfo_Dnnl* TryGetProviderInfo_Dnnl();
 ProviderInfo_Dnnl& GetProviderInfo_Dnnl();
 ProviderInfo_ROCM* TryGetProviderInfo_ROCM();
 ProviderInfo_ROCM& GetProviderInfo_ROCM();
+ProviderInfo_Zendnn* TryGetProviderInfo_Zendnn();
+ProviderInfo_Zendnn& GetProviderInfo_Zendnn();
 ProviderHostCPU& GetProviderHostCPU();
 ONNX_NAMESPACE::OpSchema CreateSchema(const std::string& domain, const std::vector<const OrtCustomOp*>& ops);
 struct TensorShapeProto_Dimension_Iterator_Impl : TensorShapeProto_Dimension_Iterator {
@@ -1599,6 +1605,7 @@ static ProviderLibrary s_library_rocm(LIBRARY_PREFIX ORT_TSTR("onnxruntime_provi
 #endif
 );
 static ProviderLibrary s_library_dnnl(LIBRARY_PREFIX ORT_TSTR("onnxruntime_providers_dnnl") LIBRARY_EXTENSION);
+static ProviderLibrary s_library_zendnn(LIBRARY_PREFIX ORT_TSTR("onnxruntime_providers_zendnn") LIBRARY_EXTENSION);
 static ProviderLibrary s_library_vitisai(LIBRARY_PREFIX ORT_TSTR("onnxruntime_providers_vitisai") LIBRARY_EXTENSION
 #ifndef _WIN32
                                          ,
@@ -1630,9 +1637,11 @@ static ProviderLibrary s_library_tensorrt(LIBRARY_PREFIX ORT_TSTR("onnxruntime_p
 #endif
 );
 static ProviderLibrary s_library_migraphx(LIBRARY_PREFIX ORT_TSTR("onnxruntime_providers_migraphx") LIBRARY_EXTENSION);
+static ProviderLibrary s_library_amd_unified(LIBRARY_PREFIX ORT_TSTR("onnxruntime_providers_amd_unified") LIBRARY_EXTENSION);
 
 void UnloadSharedProviders() {
   s_library_dnnl.Unload();
+  s_library_zendnn.Unload();
   s_library_vitisai.Unload();
   s_library_openvino.Unload();
   s_library_tensorrt.Unload();
@@ -1642,6 +1651,7 @@ void UnloadSharedProviders() {
   s_library_rocm.Unload();
   s_library_shared.Unload();
   s_library_migraphx.Unload();
+  s_library_amd_unified.Unload();
 }
 
 // Used by test code
@@ -1705,8 +1715,16 @@ std::shared_ptr<IExecutionProviderFactory> DnnlProviderFactoryCreator::Create(in
   return s_library_dnnl.Get().CreateExecutionProviderFactory(use_arena);
 }
 
+std::shared_ptr<IExecutionProviderFactory> ZendnnProviderFactoryCreator::Create(int use_arena) {
+  return s_library_zendnn.Get().CreateExecutionProviderFactory(use_arena);
+}
+
 std::shared_ptr<IExecutionProviderFactory> MIGraphXProviderFactoryCreator::Create(int device_id) {
   return s_library_migraphx.Get().CreateExecutionProviderFactory(device_id);
+}
+
+std::shared_ptr<IExecutionProviderFactory> AMDUnifiedProviderFactoryCreator::Create(int device_id) {
+  return s_library_amd_unified.Get().CreateExecutionProviderFactory(device_id);
 }
 
 // Adapter to convert the legacy OrtTensorRTProviderOptions to the latest OrtTensorRTProviderOptionsV2
@@ -1774,6 +1792,10 @@ std::shared_ptr<IExecutionProviderFactory> MIGraphXProviderFactoryCreator::Creat
   return s_library_migraphx.Get().CreateExecutionProviderFactory(provider_options);
 }
 
+std::shared_ptr<IExecutionProviderFactory> AMDUnifiedProviderFactoryCreator::Create(const OrtAMDUnifiedProviderOptions* p_provider_options) {
+  return s_library_amd_unified.Get().CreateExecutionProviderFactory(p_provider_options);
+}
+
 // Adapter to convert the legacy OrtOpenVINOProviderOptions to ProviderOptions
 ProviderOptions OrtOpenVINOProviderOptionsToOrtOpenVINOProviderOptionsV2(const OrtOpenVINOProviderOptions* legacy_ov_options) {
   ProviderOptions ov_options_converted_map;
@@ -1838,8 +1860,21 @@ std::shared_ptr<IExecutionProviderFactory> DnnlProviderFactoryCreator::Create(co
   return s_library_dnnl.Get().CreateExecutionProviderFactory(dnnl_options);
 }
 
+std::shared_ptr<IExecutionProviderFactory> ZendnnProviderFactoryCreator::Create(const OrtZendnnProviderOptions* zendnn_options) {
+  return s_library_zendnn.Get().CreateExecutionProviderFactory(zendnn_options);
+}
+
 std::shared_ptr<IExecutionProviderFactory> VitisAIProviderFactoryCreator::Create(const ProviderOptions& provider_options) {
   return s_library_vitisai.Get().CreateExecutionProviderFactory(&provider_options);
+}
+
+// FIXME: The base abstract `struct Provider` has no method with such signature as
+// `std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory(const ProviderOptions&)`,
+// so we need to add a new method in the derived `struct AMD_Unified_Provider`.
+std::shared_ptr<IExecutionProviderFactory> AMDUnifiedProviderFactoryCreator::Create(const ProviderOptions& provider_options) {
+  //Provider* p_provider = &(s_library_amd_unified.Get());
+  //return reinterpret_cast<AMD_Unified_Provider*>(p_provider)->CreateExecutionProviderFactory(provider_options);
+  return s_library_amd_unified.Get().CreateExecutionProviderFactory(provider_options);
 }
 
 ProviderInfo_OpenVINO* GetProviderInfo_OpenVINO() {
@@ -1914,6 +1949,20 @@ ProviderInfo_Dnnl& GetProviderInfo_Dnnl() {
     return *info;
 
   ORT_THROW("oneDNN Provider not available, can't get interface for it");
+}
+
+ProviderInfo_Zendnn* TryGetProviderInfo_Zendnn() try {
+  return reinterpret_cast<ProviderInfo_Zendnn*>(s_library_zendnn.Get().GetInfo());
+} catch (const std::exception& exception) {
+  LOGS_DEFAULT(ERROR) << exception.what();
+  return nullptr;
+}
+
+ProviderInfo_Zendnn& GetProviderInfo_Zendnn() {
+  if (auto* info = TryGetProviderInfo_Zendnn())
+    return *info;
+
+  ORT_THROW("Zendnn Provider not available, can't get interface for it");
 }
 
 ProviderInfo_ROCM* TryGetProviderInfo_ROCM() try {
@@ -2031,6 +2080,18 @@ ORT_API_STATUS_IMPL(OrtSessionOptionsAppendExecutionProvider_Dnnl, _In_ OrtSessi
   API_IMPL_END
 }
 
+ORT_API_STATUS_IMPL(OrtSessionOptionsAppendExecutionProvider_Zendnn, _In_ OrtSessionOptions* options, int use_arena) {
+  API_IMPL_BEGIN
+  auto factory = onnxruntime::ZendnnProviderFactoryCreator::Create(use_arena);
+  if (!factory) {
+    return OrtApis::CreateStatus(ORT_FAIL, "OrtSessionOptionsAppendExecutionProvider_Zendnn: Failed to load shared library");
+  }
+
+  options->provider_factories.push_back(factory);
+  return nullptr;
+  API_IMPL_END
+}
+
 ORT_API_STATUS_IMPL(OrtSessionOptionsAppendExecutionProvider_Tensorrt, _In_ OrtSessionOptions* options, int device_id) {
   API_IMPL_BEGIN
   OrtTensorRTProviderOptionsV2 tensorrt_options;
@@ -2127,6 +2188,13 @@ ORT_API_STATUS_IMPL(OrtSessionOptionsAppendExecutionProvider_CUDA, _In_ OrtSessi
   provider_options.device_id = device_id;
 
   return OrtApis::SessionOptionsAppendExecutionProvider_CUDA(options, &provider_options);
+}
+
+ORT_API_STATUS_IMPL(OrtSessionOptionsAppendExecutionProvider_AMD_Unified, _In_ OrtSessionOptions* options, int device_id) {
+  OrtAMDUnifiedProviderOptions provider_options{};
+  provider_options.device_id = device_id;
+
+  return OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified(options, &provider_options);
 }
 
 ORT_API_STATUS_IMPL(OrtApis::SetCurrentGpuDeviceId, [[maybe_unused]] _In_ int device_id) {
@@ -2302,7 +2370,7 @@ ORT_API_STATUS_IMPL(OrtApis::UpdateTensorRTProviderOptions,
   API_IMPL_END
 }
 
-#if defined(USE_TENSORRT) || defined(USE_CUDA) || defined(USE_CANN) || defined(USE_DNNL) || defined(USE_ROCM)
+#if defined(USE_TENSORRT) || defined(USE_CUDA) || defined(USE_CANN) || defined(USE_DNNL) || defined(USE_ZENDNN) || defined(USE_ROCM)
 static std::string BuildOptionsString(const onnxruntime::ProviderOptions::iterator& begin,
                                       const onnxruntime::ProviderOptions::iterator& end) {
   std::ostringstream options;
@@ -2779,6 +2847,9 @@ ORT_API(void, OrtApis::ReleaseROCMProviderOptions, _Frees_ptr_opt_ OrtROCMProvid
 ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_VitisAI, _In_ OrtSessionOptions* options,
                     _In_reads_(num_keys) const char* const* provider_options_keys,
                     _In_reads_(num_keys) const char* const* provider_options_values, _In_ size_t num_keys) {
+#ifdef USE_AMD_UNIFIED
+  return OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified_V2(options, provider_options_keys, provider_options_values, num_keys);
+#endif
   API_IMPL_BEGIN
   onnxruntime::ProviderOptions provider_options;
   for (size_t i = 0; i != num_keys; ++i) {
@@ -2800,6 +2871,134 @@ ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_VitisAI, _In_
   auto factory = onnxruntime::VitisAIProviderFactoryCreator::Create(provider_options);
   if (!factory) {
     return OrtApis::CreateStatus(ORT_FAIL, "SessionOptionsAppendExecutionProvider_VitisAI: Failed to load shared library");
+  }
+
+  options->provider_factories.push_back(factory);
+  return nullptr;
+  API_IMPL_END
+}
+
+ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_Zendnn,
+                    _In_ OrtSessionOptions* options, _In_ const OrtZendnnProviderOptions* zendnn_options) {
+  API_IMPL_BEGIN
+  auto factory = onnxruntime::ZendnnProviderFactoryCreator::Create(zendnn_options);
+  if (!factory) {
+    return OrtApis::CreateStatus(ORT_FAIL,
+                                 "SessionOptionsAppendExecutionProvider_Zendnn: Failed to load shared library");
+  }
+
+  options->provider_factories.push_back(factory);
+  return nullptr;
+  API_IMPL_END
+}
+
+ORT_API_STATUS_IMPL(OrtApis::CreateZendnnProviderOptions, _Outptr_ OrtZendnnProviderOptions** out) {
+  API_IMPL_BEGIN
+#ifdef USE_ZENDNN
+  auto options = std::make_unique<OrtZendnnProviderOptions>();
+  options->use_arena = true;
+  options->threadpool_args = nullptr;
+  *out = options.release();
+  return nullptr;
+#else
+  ORT_UNUSED_PARAMETER(out);
+  return CreateStatus(ORT_FAIL, "ZenDNN execution provider is not enabled in this build.");
+#endif
+  API_IMPL_END
+}
+
+ORT_API_STATUS_IMPL(OrtApis::UpdateZendnnProviderOptions,
+                    _Inout_ OrtZendnnProviderOptions* zendnn_options,
+                    _In_reads_(num_keys) const char* const* provider_options_keys,
+                    _In_reads_(num_keys) const char* const* provider_options_values,
+                    size_t num_keys) {
+  API_IMPL_BEGIN
+#ifdef USE_ZENDNN
+  onnxruntime::ProviderOptions provider_options_map;
+  for (size_t i = 0; i != num_keys; ++i) {
+    if (provider_options_keys[i] == nullptr || provider_options_keys[i][0] == '\0' ||
+        provider_options_values[i] == nullptr || provider_options_values[i][0] == '\0') {
+      return OrtApis::CreateStatus(ORT_INVALID_ARGUMENT, "key/value cannot be empty");
+    }
+
+    provider_options_map[provider_options_keys[i]] = provider_options_values[i];
+  }
+
+  onnxruntime::s_library_zendnn.Get().UpdateProviderOptions(reinterpret_cast<void*>(zendnn_options), provider_options_map);
+  return nullptr;
+#else
+  ORT_UNUSED_PARAMETER(zendnn_options);
+  ORT_UNUSED_PARAMETER(provider_options_keys);
+  ORT_UNUSED_PARAMETER(provider_options_values);
+  ORT_UNUSED_PARAMETER(num_keys);
+  return CreateStatus(ORT_FAIL, "ZenDNN execution provider is not enabled in this build.");
+#endif
+  API_IMPL_END
+}
+
+ORT_API_STATUS_IMPL(OrtApis::GetZendnnProviderOptionsAsString,
+                    _In_ const OrtZendnnProviderOptions* zendnn_options, _Inout_ OrtAllocator* allocator,
+                    _Outptr_ char** ptr) {
+  API_IMPL_BEGIN
+#ifdef USE_ZENDNN
+  onnxruntime::ProviderOptions options =
+      onnxruntime::s_library_zendnn.Get().GetProviderOptions(reinterpret_cast<const void*>(zendnn_options));
+  std::string options_str = BuildOptionsString(options.begin(), options.end());
+  *ptr = onnxruntime::StrDup(options_str, allocator);
+  return nullptr;
+#else
+  ORT_UNUSED_PARAMETER(zendnn_options);
+  ORT_UNUSED_PARAMETER(allocator);
+  ORT_UNUSED_PARAMETER(ptr);
+  return CreateStatus(ORT_FAIL, "ZenDNN execution provider is not enabled in this build.");
+#endif
+  API_IMPL_END
+}
+
+ORT_API(void, OrtApis::ReleaseZendnnProviderOptions, _Frees_ptr_opt_ OrtZendnnProviderOptions* ptr) {
+#ifdef USE_ZENDNN
+  std::unique_ptr<OrtZendnnProviderOptions> p(ptr);
+#else
+  ORT_UNUSED_PARAMETER(ptr);
+#endif
+}
+
+ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified, _In_ OrtSessionOptions* options, _In_ const OrtAMDUnifiedProviderOptions* amd_unified_options) {
+  API_IMPL_BEGIN
+  auto factory = onnxruntime::AMDUnifiedProviderFactoryCreator::Create(amd_unified_options);
+  if (!factory) {
+    return OrtApis::CreateStatus(ORT_FAIL, "SessionOptionsAppendExecutionProvider_AMD_Unified: Failed to load shared library");
+  }
+
+  options->provider_factories.push_back(factory);
+  return nullptr;
+  API_IMPL_END
+}
+
+ORT_API_STATUS_IMPL(OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified_V2, _In_ OrtSessionOptions* options,
+                    _In_reads_(num_keys) const char* const* provider_options_keys,
+                    _In_reads_(num_keys) const char* const* provider_options_values, _In_ size_t num_keys) {
+  API_IMPL_BEGIN
+  onnxruntime::ProviderOptions provider_options;
+  for (size_t i = 0; i != num_keys; ++i) {
+    if (provider_options_keys[i] == nullptr || provider_options_keys[i][0] == '\0' ||
+        provider_options_values[i] == nullptr || provider_options_values[i][0] == '\0') {
+      return OrtApis::CreateStatus(ORT_INVALID_ARGUMENT, "Provider options key/value cannot be empty");
+    }
+
+    // arbitrary length to validate the key/value. adjust if/when needed.
+    // TODO: are any other input validation checks required here (and in the other functions that process
+    // provider options)?
+    if (strlen(provider_options_keys[i]) > 1024 || strlen(provider_options_values[i]) > 1024) {
+      return OrtApis::CreateStatus(ORT_INVALID_ARGUMENT,
+                                   "Maximum string length for a provider options key/value is 1024.");
+    }
+
+    provider_options[provider_options_keys[i]] = provider_options_values[i];
+  }
+  auto factory = onnxruntime::AMDUnifiedProviderFactoryCreator::Create(provider_options);
+  if (!factory) {
+    return OrtApis::CreateStatus(ORT_FAIL, "SessionOptionsAppendExecutionProvider_AMD_Unified_V2: Failed to load shared library");
   }
 
   options->provider_factories.push_back(factory);

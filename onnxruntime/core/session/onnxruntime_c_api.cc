@@ -68,6 +68,14 @@ ProviderInfo_Dnnl* TryGetProviderInfo_Dnnl();
 }
 #endif
 
+#ifdef USE_ZENDNN
+#include "core/providers/zendnn/zendnn_provider_factory.h"
+#include "core/providers/zendnn/zendnn_execution_provider_info.h"
+namespace onnxruntime {
+ProviderInfo_Zendnn* TryGetProviderInfo_Zendnn();
+}
+#endif
+
 #ifdef USE_DML
 #include "core/providers/dml/dml_provider_factory.h"
 const OrtDmlApi* GetOrtDmlApi(_In_ uint32_t version) NO_EXCEPTION;
@@ -2730,6 +2738,14 @@ static constexpr OrtApi ort_api_1_to_19 = {
     &OrtApis::KernelInfoGetAllocator,
     &OrtApis::AddExternalInitializersFromFilesInMemory,
     // End of Version 18 - DO NOT MODIFY ABOVE (see above text for more information)
+
+    &OrtApis::SessionOptionsAppendExecutionProvider_Zendnn,
+    &OrtApis::CreateZendnnProviderOptions,
+    &OrtApis::UpdateZendnnProviderOptions,
+    &OrtApis::GetZendnnProviderOptionsAsString,
+    &OrtApis::ReleaseZendnnProviderOptions,
+    &OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified,
+    &OrtApis::SessionOptionsAppendExecutionProvider_AMD_Unified_V2,
 };
 
 // OrtApiBase can never change as there is no way to know what version of OrtApiBase is returned by OrtGetApiBase.

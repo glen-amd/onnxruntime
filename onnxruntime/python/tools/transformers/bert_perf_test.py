@@ -140,7 +140,11 @@ def create_session(
         else:
             assert "CUDAExecutionProvider" in session.get_providers()
     else:
-        assert "CPUExecutionProvider" in session.get_providers()
+        if provider == "zendnn":
+            assert "ZendnnExecutionProvider" in session.get_providers()
+            assert "CPUExecutionProvider" in session.get_providers()
+        else:
+            assert "CPUExecutionProvider" in session.get_providers()
 
     if tuning_results_path is not None:
         with open(tuning_results_path) as f:

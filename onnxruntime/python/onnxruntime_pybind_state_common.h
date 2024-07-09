@@ -23,7 +23,7 @@ struct OrtStatus {
   char msg[1];  // a null-terminated string
 };
 
-#define BACKEND_DEVICE BACKEND_PROC BACKEND_DNNL BACKEND_OPENVINO BACKEND_TVM BACKEND_OPENBLAS BACKEND_MIGRAPHX BACKEND_ACL BACKEND_ARMNN BACKEND_DML BACKEND_CANN
+#define BACKEND_DEVICE BACKEND_PROC BACKEND_DNNL BACKEND_ZENDNN BACKEND_OPENVINO BACKEND_TVM BACKEND_OPENBLAS BACKEND_MIGRAPHX BACKEND_ACL BACKEND_ARMNN BACKEND_DML BACKEND_CANN BACKEND_AMD_UNIFIED
 #include "core/session/onnxruntime_cxx_api.h"
 #include "core/providers/providers.h"
 #include "core/providers/provider_factory_creators.h"
@@ -35,16 +35,34 @@ struct OrtStatus {
 #define BACKEND_PROC "CPU"
 #endif
 
+#if defined(USE_VITISAI) || defined(USE_AMD_UNIFIED)
+#define BACKEND_VITISAI "-VITISAI"
+#else
+#define BACKEND_VITISAI ""
+#endif
+
 #if USE_DNNL
 #define BACKEND_DNNL "-DNNL"
 #else
 #define BACKEND_DNNL ""
 #endif
 
-#if USE_MIGRAPHX
+#if defined(USE_ZENDNN) || defined(USE_AMD_UNIFIED)
+#define BACKEND_ZENDNN "-ZENDNN"
+#else
+#define BACKEND_ZENDNN ""
+#endif
+
+#if defined(USE_MIGRAPHX) || defined(USE_AMD_UNIFIED)
 #define BACKEND_MIGRAPHX "-MIGRAPHX"
 #else
 #define BACKEND_MIGRAPHX ""
+#endif
+
+#ifdef USE_AMD_UNIFIED
+#define BACKEND_AMD_UNIFIED "-AMD_UNIFIED"
+#else
+#define BACKEND_AMD_UNIFIED ""
 #endif
 
 #ifdef USE_OPENVINO
@@ -124,6 +142,9 @@ struct OrtStatus {
 #ifdef USE_MIGRAPHX
 #include "core/providers/migraphx/migraphx_provider_factory.h"
 #endif
+#ifdef USE_AMD_UNIFIED
+#include "core/providers/amd_unified/amd_unified_provider_factory.h"
+#endif
 #ifdef USE_OPENVINO
 #include "core/providers/openvino/openvino_provider_factory.h"
 // TODO remove deprecated global config
@@ -200,6 +221,7 @@ extern onnxruntime::ArenaExtendStrategy arena_extend_strategy;
 #endif
 
 #include "core/providers/dnnl/dnnl_provider_factory.h"
+#include "core/providers/zendnn/zendnn_provider_factory.h"
 #include "core/providers/shared_library/provider_host_api.h"
 
 namespace onnxruntime {
@@ -431,10 +453,14 @@ void DlpackCapsuleDestructor(PyObject* data);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tensorrt(const OrtTensorRTProviderOptions* params);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tensorrt(const OrtTensorRTProviderOptionsV2* params);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tensorrt(int device_id);
+std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_AMD_Unified(const OrtAMDUnifiedProviderOptions* params);
+std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_AMD_Unified(int device_id);
+std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_AMD_Unified(const ProviderOptions& options);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_MIGraphX(const OrtMIGraphXProviderOptions* params);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_MIGraphX(int device_id);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Cuda(const OrtCUDAProviderOptions* params);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Dnnl(const OrtDnnlProviderOptions* params);
+std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Zendnn(const OrtZendnnProviderOptions* params);
 #ifdef USE_TVM
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tvm(const tvm::TvmEPOptions& info);
 std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_Tvm(const char* params);

@@ -269,6 +269,8 @@ constexpr const char* kMIGraphXExecutionProvider = "MIGraphXExecutionProvider";
 constexpr const char* kQnnExecutionProvider = "QNNExecutionProvider";
 constexpr const char* kCpuExecutionProvider = "CPUExecutionProvider";
 constexpr const char* kAzureExecutionProvider = "AzureExecutionProvider";
+constexpr const char* kAMDUnifiedExecutionProvider = "AMDUnifiedExecutionProvider";
+constexpr const char* kZendnnExecutionProvider = "ZendnnExecutionProvider";
 
 template <typename T>
 using IAllocatorUniquePtr = std::unique_ptr<T, std::function<void(T*)>>;

@@ -589,6 +589,8 @@ def parse_arguments():
     parser.add_argument("--use_migraphx", action="store_true", help="Build with MIGraphX")
     parser.add_argument("--migraphx_home", help="Path to MIGraphX installation dir")
     parser.add_argument("--use_full_protobuf", action="store_true", help="Use the full protobuf library")
+    parser.add_argument("--use_zendnn", action="store_true", help="Build with ZenDNN")
+    parser.add_argument("--use_amd_unified", action="store_true", help="Build with AMD Unified AI")
 
     parser.add_argument(
         "--llvm_config",
@@ -1035,6 +1037,8 @@ def generate_build_tree(
         "-Donnxruntime_TVM_USE_HASH=" + ("ON" if args.use_tvm_hash else "OFF"),
         # set vars for migraphx
         "-Donnxruntime_USE_MIGRAPHX=" + ("ON" if args.use_migraphx else "OFF"),
+        "-Donnxruntime_USE_ZENDNN=" + ("ON" if args.use_zendnn else "OFF"),
+        "-Donnxruntime_USE_AMD_UNIFIED=" + ("ON" if args.use_amd_unified else "OFF"),
         "-Donnxruntime_DISABLE_CONTRIB_OPS=" + ("ON" if args.disable_contrib_ops else "OFF"),
         "-Donnxruntime_DISABLE_ML_OPS=" + ("ON" if args.disable_ml_ops else "OFF"),
         "-Donnxruntime_DISABLE_RTTI="
@@ -1244,7 +1248,7 @@ def generate_build_tree(
         ]
 
     # VitisAI and OpenVINO providers currently only support full_protobuf option.
-    if args.use_full_protobuf or args.use_openvino or args.use_vitisai or args.gen_doc:
+    if args.use_full_protobuf or args.use_openvino or args.use_vitisai or args.use_amd_unified or args.gen_doc:
         cmake_args += ["-Donnxruntime_USE_FULL_PROTOBUF=ON", "-DProtobuf_USE_STATIC_LIBS=ON"]
 
     if args.use_tvm and args.llvm_path is not None:
@@ -2213,10 +2217,12 @@ def build_python_wheel(
     use_rocm,
     rocm_version,
     use_dnnl,
+    use_zendnn,
     use_tensorrt,
     use_openvino,
     use_tvm,
     use_vitisai,
+    use_amd_unified,
     use_acl,
     use_armnn,
     use_dml,
@@ -2270,6 +2276,10 @@ def build_python_wheel(
             args.append("--use_tvm")
         elif use_vitisai:
             args.append("--use_vitisai")
+        elif use_zendnn:
+            args.append("--use_zendnn")
+        elif use_amd_unified:
+            args.append("--use_amd_unified")
         elif use_acl:
             args.append("--use_acl")
         elif use_armnn:
@@ -2898,10 +2908,12 @@ def main():
                 args.use_rocm,
                 args.rocm_version,
                 args.use_dnnl,
+                args.use_zendnn,
                 args.use_tensorrt,
                 args.use_openvino,
                 args.use_tvm,
                 args.use_vitisai,
+                args.use_amd_unified,
                 args.use_acl,
                 args.use_armnn,
                 args.use_dml,

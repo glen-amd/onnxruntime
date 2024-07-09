@@ -78,6 +78,7 @@ with open(args.output_source, "w") as file:
             "xnnpack",
             "cann",
             "dnnl",
+            "zendnn",
             "tensorrt",
             "azure",
         ):
@@ -85,6 +86,6 @@ with open(args.output_source, "w") as file:
     file.write("void* GetFunctionEntryByName(const char* name){\n")
     for symbol in symbols:
         if symbol != "OrtGetWinMLAdapter":
-            file.write(f'if(strcmp(name,"{symbol}") ==0) return (void*)&{symbol};\n')
+            file.write(f'if(strcmp(name,"{symbol}") == 0) return (void*)&{symbol};\n')
     file.write("return NULL;\n")
     file.write("}\n")

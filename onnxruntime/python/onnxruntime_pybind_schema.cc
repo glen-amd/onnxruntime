@@ -37,6 +37,9 @@ void addGlobalSchemaFunctions(pybind11::module& m) {
 #ifdef USE_DNNL
             onnxruntime::DnnlProviderFactoryCreator::Create(1),
 #endif
+#ifdef USE_ZENDNN
+            onnxruntime::ZendnnProviderFactoryCreator::Create(1),
+#endif
 #ifdef USE_OPENVINO
             []() {
               ProviderOptions provider_options_map;
@@ -52,6 +55,10 @@ void addGlobalSchemaFunctions(pybind11::module& m) {
 #endif
 #ifdef USE_VITISAI
             onnxruntime::VitisAIProviderFactoryCreator::Create(ProviderOptions{}),
+#endif
+#ifdef USE_AMD_UNIFIED
+            // FIXME: Which `AMDUnifiedProviderFactoryCreator::Create()` should be used?
+            onnxruntime::AMDUnifiedProviderFactoryCreator::Create(ProviderOptions{}),
 #endif
 #ifdef USE_ACL
             onnxruntime::ACLProviderFactoryCreator::Create(0),

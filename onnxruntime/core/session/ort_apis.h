@@ -520,6 +520,23 @@ ORT_API_STATUS_IMPL(SessionOptionsAppendExecutionProvider_VitisAI, _In_ OrtSessi
                     _In_reads_(num_keys) const char* const* provider_options_keys,
                     _In_reads_(num_keys) const char* const* provider_options_values, _In_ size_t num_keys);
 
+ORT_API_STATUS_IMPL(SessionOptionsAppendExecutionProvider_Zendnn,
+                    _In_ OrtSessionOptions* options, _In_ const OrtZendnnProviderOptions* zendnn_options);
+ORT_API_STATUS_IMPL(CreateZendnnProviderOptions, _Outptr_ OrtZendnnProviderOptions** out);
+ORT_API_STATUS_IMPL(UpdateZendnnProviderOptions, _Inout_ OrtZendnnProviderOptions* zendnn_options,
+                    _In_reads_(num_keys) const char* const* provider_options_keys,
+                    _In_reads_(num_keys) const char* const* provider_options_values,
+                    size_t num_keys);
+ORT_API_STATUS_IMPL(GetZendnnProviderOptionsAsString, _In_ const OrtZendnnProviderOptions* zendnn_options,
+                    _Inout_ OrtAllocator* allocator, _Outptr_ char** ptr);
+ORT_API(void, ReleaseZendnnProviderOptions, _Frees_ptr_opt_ OrtZendnnProviderOptions*);
+
+ORT_API_STATUS_IMPL(SessionOptionsAppendExecutionProvider_AMD_Unified,
+                    _In_ OrtSessionOptions* options, _In_ const OrtAMDUnifiedProviderOptions* amd_unified_options);
+ORT_API_STATUS_IMPL(SessionOptionsAppendExecutionProvider_AMD_Unified_V2, _In_ OrtSessionOptions* options,
+                    _In_reads_(num_keys) const char* const* provider_options_keys,
+                    _In_reads_(num_keys) const char* const* provider_options_values, _In_ size_t num_keys);
+
 ORT_API_STATUS_IMPL(KernelContext_GetScratchBuffer, _In_ const OrtKernelContext* context, _In_ const OrtMemoryInfo* mem_info, _In_ size_t count_or_bytes, _Outptr_ void** out);
 
 ORT_API_STATUS_IMPL(KernelInfoGetAllocator, _In_ const OrtKernelInfo* info, _In_ OrtMemType mem_type, _Outptr_ OrtAllocator** out);

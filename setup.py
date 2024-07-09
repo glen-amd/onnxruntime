@@ -73,6 +73,13 @@ elif parse_arg_remove_boolean(sys.argv, "--use_dnnl"):
     package_name = "onnxruntime-dnnl"
 elif parse_arg_remove_boolean(sys.argv, "--use_tvm"):
     package_name = "onnxruntime-tvm"
+elif parse_arg_remove_boolean(sys.argv, "--use_amd_unified"):
+    package_name = "onnxruntime-amd_unified"
+    parse_arg_remove_boolean(sys.argv, "--use_vitisai")
+    parse_arg_remove_boolean(sys.argv, "--use_migraphx")
+    parse_arg_remove_boolean(sys.argv, "--use_zendnn")
+elif parse_arg_remove_boolean(sys.argv, "--use_zendnn"):
+    package_name = "onnxruntime-zendnn"
 elif parse_arg_remove_boolean(sys.argv, "--use_vitisai"):
     package_name = "onnxruntime-vitisai"
 elif parse_arg_remove_boolean(sys.argv, "--use_acl"):
@@ -293,6 +300,10 @@ if platform.system() == "Linux":
     libs = [
         "onnxruntime_pybind11_state.so",
         "libdnnl.so.2",
+        "libamdZenDNN.so",
+        "libblis-mt.so",
+        "libblis-mt.so.4",
+        "libblis-mt.so.3.0.0",
         "libmklml_intel.so",
         "libmklml_gnu.so",
         "libiomp5.so",
@@ -303,12 +314,14 @@ if platform.system() == "Linux":
     dl_libs.append(providers_cuda_or_rocm)
     dl_libs.append(providers_tensorrt_or_migraphx)
     dl_libs.append(providers_cann)
+    dl_libs.append("libonnxruntime_providers_zendnn.so")
     dl_libs.append("libonnxruntime.so*")
     # DNNL, TensorRT & OpenVINO EPs are built as shared libs
     libs.extend(["libonnxruntime_providers_shared.so"])
     libs.extend(["libonnxruntime_providers_dnnl.so"])
+    libs.extend(["libonnxruntime_providers_zendnn.so"])
     libs.extend(["libonnxruntime_providers_openvino.so"])
-    libs.extend(["libonnxruntime_providers_vitisai.so"])
+    libs.extend(["libonnxruntime_providers_vitisai.so", "libonnxruntime_providers_amd_unified.so"])])
     libs.append(providers_cuda_or_rocm)
     libs.append(providers_tensorrt_or_migraphx)
     libs.append(providers_cann)
@@ -333,6 +346,7 @@ else:
     libs = [
         "onnxruntime_pybind11_state.pyd",
         "dnnl.dll",
+        "amdZenDNN.dll", "AOCL-LibBlis-Win-MT-dll.dll", "libomp.dll",
         "mklml.dll",
         "libiomp5md.dll",
         "onnxruntime.dll",
@@ -343,7 +357,7 @@ else:
     libs.extend(["onnxruntime_providers_tensorrt.dll"])
     libs.extend(["onnxruntime_providers_openvino.dll"])
     libs.extend(["onnxruntime_providers_cuda.dll"])
-    libs.extend(["onnxruntime_providers_vitisai.dll"])
+    libs.extend(["onnxruntime_providers_vitisai.dll", "onnxruntime_providers_amd_unified.dll"])
     # DirectML Libs
     libs.extend(["DirectML.dll"])
     # QNN V68/V73 dependencies

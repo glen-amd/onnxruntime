@@ -96,8 +96,8 @@ def parse_arguments(argv=None):
         "--provider",
         required=False,
         default=None,
-        choices=["dml", "rocm", "migraphx", "cuda", "tensorrt"],
-        help="use dml, rocm, cuda, tensorrt or migraphx for respective backend",
+        choices=["dml", "rocm", "migraphx", "cuda", "tensorrt", "amd_unified"],
+        help="use dml, rocm, cuda, tensorrt, migraphx or amd_unified for respective backend",
     )
 
     parser.add_argument(
